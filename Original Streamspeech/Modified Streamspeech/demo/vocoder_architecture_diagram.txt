@@ -1,0 +1,139 @@
+HiFi-GAN VOCODER ARCHITECTURE DIAGRAM
+=====================================
+Modified StreamSpeech with ODConv, GRC+LoRA, and FiLM Conditioning
+
+INPUT: Mel-Spectrogram [1, 80, T]
+│
+├─ Initial Conv1d(80→512, k=7) ──────────────────────────────────────────────┐
+│                                                                             │
+├─ ODConv + FiLM Layer 1 ───────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ ODConvTranspose1d(512→256, k=16, s=8) ──→ Upsample ×8 ──────────────┤
+│   │                                                                         │
+│   ├─ FiLM Conditioning ───────────────────────────────────────────────────┤
+│   │   ├─ Speaker Embed [1,192] ──────────────────────────────────────────┤
+│   │   └─ Emotion Embed [1,256] ──────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ LeakyReLU(0.1) ──────────────────────────────────────────────────────┤
+│                                                                             │
+├─ ODConv + FiLM Layer 2 ───────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ ODConvTranspose1d(256→128, k=16, s=8) ──→ Upsample ×8 ──────────────┤
+│   │                                                                         │
+│   ├─ FiLM Conditioning ───────────────────────────────────────────────────┤
+│   │   ├─ Speaker Embed [1,192] ──────────────────────────────────────────┤
+│   │   └─ Emotion Embed [1,256] ──────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ LeakyReLU(0.1) ──────────────────────────────────────────────────────┤
+│                                                                             │
+├─ ODConv + FiLM Layer 3 ───────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ ODConvTranspose1d(128→64, k=4, s=2) ────→ Upsample ×2 ──────────────┤
+│   │                                                                         │
+│   ├─ FiLM Conditioning ───────────────────────────────────────────────────┤
+│   │   ├─ Speaker Embed [1,192] ──────────────────────────────────────────┤
+│   │   └─ Emotion Embed [1,256] ──────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ LeakyReLU(0.1) ──────────────────────────────────────────────────────┤
+│                                                                             │
+├─ ODConv + FiLM Layer 4 ───────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ ODConvTranspose1d(64→1, k=4, s=2) ──────→ Upsample ×2 ──────────────┤
+│   │                                                                         │
+│   ├─ FiLM Conditioning ───────────────────────────────────────────────────┤
+│   │   ├─ Speaker Embed [1,192] ──────────────────────────────────────────┤
+│   │   └─ Emotion Embed [1,256] ──────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ LeakyReLU(0.1) ──────────────────────────────────────────────────────┤
+│                                                                             │
+├─ Multi-Receptive Field Fusion (GRC+LoRA) ──────────────────────────────────┤
+│   │                                                                         │
+│   ├─ Grouped Residual Convolution ────────────────────────────────────────┤
+│   │   ├─ Group 1: Conv1d(k=3, d=[1,3,5]) ─────────────────────────────────┤
+│   │   ├─ Group 2: Conv1d(k=7, d=[1,3,5]) ─────────────────────────────────┤
+│   │   ├─ Group 3: Conv1d(k=11, d=[1,3,5]) ────────────────────────────────┤
+│   │   └─ Group 4: Conv1d(k=3, d=[1,3,5]) ─────────────────────────────────┤
+│   │                                                                         │
+│   └─ LoRA Adaptation (rank=4) ────────────────────────────────────────────┤
+│                                                                             │
+├─ Post-processing ──────────────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ Conv1d(1→1, k=7) ────────────────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ Tanh Activation ──────────────────────────────────────────────────────┤
+│                                                                             │
+├─ Voice Cloning Enhancement ─────────────────────────────────────────────────┤
+│   │                                                                         │
+│   ├─ Conv1d(1→64, k=3) + ReLU ────────────────────────────────────────────┤
+│   │                                                                         │
+│   └─ Conv1d(64→1, k=3) ───────────────────────────────────────────────────┤
+│                                                                             │
+└─ OUTPUT: Audio Waveform [1, 1, T×256] ─────────────────────────────────────┘
+
+DATA FLOW SUMMARY:
+==================
+
+Input Shape:     [1, 80, T]           (Mel-spectrogram)
+    ↓
+Initial Conv:    [1, 512, T]          (Channel expansion)
+    ↓
+Layer 1:         [1, 256, T×8]        (ODConv + FiLM, upsample ×8)
+    ↓
+Layer 2:         [1, 128, T×64]       (ODConv + FiLM, upsample ×8)
+    ↓
+Layer 3:         [1, 64, T×128]       (ODConv + FiLM, upsample ×2)
+    ↓
+Layer 4:         [1, 1, T×256]        (ODConv + FiLM, upsample ×2)
+    ↓
+GRC+LoRA:        [1, 1, T×256]        (Temporal modeling)
+    ↓
+Post Conv:       [1, 1, T×256]        (Final convolution)
+    ↓
+Tanh:            [1, 1, T×256]        (Activation)
+    ↓
+Voice Cloning:   [1, 1, T×256]        (Enhancement)
+    ↓
+Output:          [T×256]               (Audio samples)
+
+TOTAL UP SAMPLING: 8 × 8 × 2 × 2 = 256×
+FINAL AUDIO LENGTH: T × 256 samples
+SAMPLE RATE: 22050 Hz
+AUDIO DURATION: T × 256 / 22050 seconds
+
+KEY MODIFICATIONS:
+==================
+
+1. ODConv (Omni-Dimensional Dynamic Convolution):
+   - Replaces static ConvTranspose1D layers
+   - Dynamic kernel adaptation for better acoustic patterns
+   - Applied in all 4 upsampling layers
+
+2. FiLM (Feature-wise Linear Modulation):
+   - Applied after every ODConv layer
+   - Conditions on speaker [192] and emotion [256] embeddings
+   - Preserves speaker identity and emotional expressiveness
+
+3. GRC+LoRA (Grouped Residual Convolution + Low-Rank Adaptation):
+   - Replaces original Residual Blocks in MRF
+   - 4 parallel processing groups
+   - LoRA rank=4 for efficient fine-tuning
+   - Multi-scale temporal modeling (kernels: 3,7,11)
+
+4. Voice Cloning Enhancement:
+   - Final post-processing step
+   - Preserves source speaker characteristics
+   - Applied to final audio waveform
+
+THESIS CONTRIBUTIONS:
+====================
+
+✅ ODConv: More efficient convolution with dynamic adaptation
+✅ GRC+LoRA: Better temporal modeling with reduced parameters  
+✅ FiLM: Speaker and emotion conditioning for voice cloning
+✅ Voice Cloning: Preserves speaker identity in target language
+✅ Real Models: Uses actual trained models from D:\Thesis - Tool\checkpoints\
+
+
+
+
+

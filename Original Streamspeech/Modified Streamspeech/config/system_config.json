@@ -1,0 +1,6 @@
+{
+  "generator_model": "models/trained_generator.pth",
+  "discriminator_model": "models/trained_discriminator.pth",
+  "use_trained_models": true,
+  "model_source": "Colab Training Results"
+}
