@@ -1,0 +1,12 @@
+{
+    "data-bin": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/configs/es-en",
+    "user-dir": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/researches/ctc_unity",
+    "agent-dir": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/agent",
+    "model-path": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/pretrain_models/streamspeech.simultaneous.es-en.pt",
+    "config-yaml": "config_gcmvn.yaml",
+    "multitask-config-yaml": "config_mtl_asr_st_ctcst.yaml",
+    "segment-size": 320,
+    "vocoder": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/g_00500000",
+    "vocoder-cfg": "D:/BSCS 4th Year/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/config.json",
+    "dur-prediction": true
+}

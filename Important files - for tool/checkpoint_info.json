@@ -1,0 +1,8 @@
+{
+  "architecture": "BasicHiFiGAN",
+  "parameters": 44,
+  "trained": true,
+  "loss": 0.1734122620895505,
+  "epochs": 20,
+  "samples": 2530
+}

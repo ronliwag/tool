@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Model checkpoints and weights (too large for GitHub)
+*.pt
+*.pth
+*.bin
+*.ckpt
+*.safetensors
+
+# Datasets
+*.zip
+professional_cvss_dataset/
+real_training_dataset/
+
+# Checkpoints and logs
+*checkpoints*/
+*logs*/
+professional_cvss_logs/
+
+# Pretrained models
+pretrained_models/
+pretrain_models/
+
+# Trained models
+trained_models/
+
+# Backup files
+backups/
+*_backup.py
+*_old.py
+
+# Diagnostics and test outputs
+diagnostics/
+*.wav
+*.mp3
+
+# Uploads folder
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+tmp_*
+file_sizes.txt
+
+# Git objects (already in your directory)
+*.pack
+objects/
+
