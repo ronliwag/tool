@@ -1,0 +1,6 @@
+# StreamSpeech Comparison Tool - Streamlit Requirements
+streamlit>=1.28.0
+numpy>=1.24.0
+soundfile>=0.12.0
+plotly>=5.17.0
+
