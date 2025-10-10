@@ -1,0 +1,43 @@
+// Consolidated dependencies for the StreamSpeech Tool
+// GPU: install torch/torchaudio matching your CUDA first (see README)
+
+numpy>=1.21.0
+scipy>=1.9.0
+soundfile>=0.12.0
+librosa>=0.10.0
+
+# Progress / plots (used by desktop apps and diagnostics)
+tqdm>=4.65.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Core ML
+# Pin left to user-specific CUDA builds; fallback CPU wheels work too
+torch
+torchaudio
+
+# NLP / Transformers stack
+transformers>=4.30.0
+accelerate>=0.20.0
+datasets>=2.12.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+
+# ASR (Whisper)
+openai-whisper>=20230314
+
+# System utilities
+psutil>=5.9.0
+
+# Desktop apps
+PySide6>=6.6.0
+pygame>=2.5.0
+pyaudio; platform_system=="Windows"
+
+# Optional but helpful
+sounddevice>=0.4.6
+numba>=0.57.0
+jinja2>=3.1.2
+requests>=2.31.0
+
+
