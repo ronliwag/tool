@@ -1,5 +1,5 @@
 global_cmvn:
-  stats_npz_path: D:/BSCS 4th Year/Tool v2/Original Streamspeech/configs/es-en/gcmvn.npz
+  stats_npz_path: C:/Users/ronco/Documents/Tool v2/Original Streamspeech/configs/es-en/gcmvn.npz
 input_channels: 1
 input_feat_per_channel: 80
 specaugment:
@@ -16,6 +16,6 @@ transforms:
   - global_cmvn
   - specaugment
 vocoder:
-  checkpoint: D:/BSCS 4th Year/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/g_00500000
-  config: D:/BSCS 4th Year/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/config.json
+  checkpoint: C:/Users/ronco/Documents/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/g_00500000
+  config: C:/Users/ronco/Documents/Tool v2/Original Streamspeech/pretrain_models/unit-based_HiFi-GAN_vocoder/mHuBERT.layer11.km1000.en/config.json
   type: code_hifigan

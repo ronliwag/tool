@@ -27,10 +27,10 @@ import soundfile
 import torch
 import pygame
 import matplotlib.pyplot as plt
-# Use Qt5Agg backend for matplotlib (compatible with PySide6)
+# Use QtAgg backend for matplotlib (compatible with PySide6)
 import matplotlib
-matplotlib.use('Qt5Agg')
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+matplotlib.use('QtAgg')
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import pyaudio
 import wave
 import traceback
@@ -73,6 +73,16 @@ except ImportError as e:
     StreamSpeechS2STAgent = None
     OnlineFeatureExtractor = None
     SAMPLE_RATE = 22050
+    
+    # Define dummy reset and run functions
+    def reset():
+        """Dummy reset function when original StreamSpeech is not available."""
+        pass
+    
+    def run(audio_path):
+        """Dummy run function when original StreamSpeech is not available."""
+        print(f"Original StreamSpeech not available, cannot process: {audio_path}")
+        return None
 
 
 class StreamSpeechComparisonApp(QMainWindow):
@@ -1628,6 +1638,26 @@ class StreamSpeechComparisonApp(QMainWindow):
         except Exception as e:
             self.log(f"Error in latency change: {str(e)}")
     
+    def get_reference_text_from_metadata(self, audio_filename):
+        """Load reference text from metadata.json"""
+        try:
+            import json
+            metadata_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "real_training_dataset", "metadata.json")
+            if os.path.exists(metadata_path):
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+                    # Extract just the filename without path
+                    base_filename = os.path.basename(audio_filename).replace('.wav', '').replace('.mp3', '')
+                    # Find matching entry
+                    for entry in metadata:
+                        if entry['id'] in base_filename or base_filename in entry.get('spanish_audio_path', ''):
+                            return entry['english_text']
+            # Fallback if not found
+            return "Hello, how are you today?"
+        except Exception as e:
+            print(f"Warning: Could not load reference text: {e}")
+            return "Hello, how are you today?"
+    
     def track_processing_metrics(self, processing_time, audio_duration):
         """Track processing metrics for model comparison."""
         try:
@@ -1702,26 +1732,38 @@ class StreamSpeechComparisonApp(QMainWindow):
                 
                 from simple_metrics_calculator import simple_metrics_calculator
                 
-                # Load the processed audio file for metrics calculation
+                # Load the INPUT audio file (Spanish) for metrics calculation
                 if hasattr(self, 'last_processed_file') and self.last_processed_file:
-                    original_audio, sr = librosa.load(self.last_processed_file, sr=22050)
+                    input_audio, sr = librosa.load(self.last_processed_file, sr=22050)
                     
-                    # For Modified mode, use enhanced audio if available
-                    if self.current_mode == "Modified" and hasattr(self, 'last_enhanced_audio') and self.last_enhanced_audio is not None:
-                        enhanced_audio = self.last_enhanced_audio
+                    # Load the OUTPUT audio file (English) - the translated audio
+                    outputs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "example", "outputs")
+                    mode_prefix = self.current_mode.lower()
+                    base_filename = os.path.basename(self.last_processed_file)
+                    output_filename = f"{mode_prefix}_output_{base_filename}"
+                    output_path = os.path.join(outputs_dir, output_filename)
+                    
+                    if os.path.exists(output_path):
+                        output_audio, output_sr = librosa.load(output_path, sr=22050)
+                        self.log(f"[Real Metrics] Loaded output audio: {output_filename}")
                     else:
-                        # For Original mode or fallback, use original audio
-                        enhanced_audio = original_audio
+                        self.log(f"[Real Metrics] Warning: Output not found, skipping metrics")
+                        output_audio = None
                     
-                    # Calculate Cosine Similarity
-                    cosine_results = simple_metrics_calculator.calculate_cosine_similarity(
-                        original_audio, enhanced_audio, sample_rate=22050
-                    )
-                    
-                    # Calculate ASR-BLEU
-                    asr_bleu_results = simple_metrics_calculator.calculate_asr_bleu(
-                        enhanced_audio, "Hello, how are you today?"
-                    )
+                    if output_audio is not None:
+                        # Get correct reference text from metadata
+                        reference_text = self.get_reference_text_from_metadata(self.last_processed_file)
+                        self.log(f"[Real Metrics] Using reference: '{reference_text}'")
+                        
+                        # Calculate Cosine Similarity (Spanish INPUT vs English OUTPUT)
+                        cosine_results = simple_metrics_calculator.calculate_cosine_similarity(
+                            input_audio, output_audio, sample_rate=22050, mode=self.current_mode
+                        )
+                        
+                        # Calculate ASR-BLEU (transcribe English OUTPUT)
+                        asr_bleu_results = simple_metrics_calculator.calculate_asr_bleu(
+                            output_audio, reference_text, sample_rate=22050, mode=self.current_mode
+                        )
                     
                     # Display SOP metrics
                     self.log(f"  - Cosine Similarity (SIM): {cosine_results['speaker_similarity']:.4f}")
@@ -2295,18 +2337,31 @@ class StreamSpeechComparisonApp(QMainWindow):
                     
                     from simple_metrics_calculator import simple_metrics_calculator
                     
-                    # For Original mode, we'll use a dummy enhanced audio (since it's the baseline)
-                    # This represents the original StreamSpeech output
-                    dummy_enhanced_audio = original_audio  # Original mode doesn't enhance
+                    # For Original mode, compare Spanish INPUT to English OUTPUT (the translated audio)
+                    outputs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "example", "outputs")
+                    base_filename = os.path.basename(file_path)
+                    output_filename = f"original_output_{base_filename}"
+                    output_path = os.path.join(outputs_dir, output_filename)
                     
-                    # Calculate real metrics for Original mode
+                    if os.path.exists(output_path):
+                        output_audio, output_sr = librosa.load(output_path, sr=22050)
+                        self.log(f"[Real Metrics] Loaded English output: {output_filename}")
+                    else:
+                        self.log(f"[Real Metrics] Warning: Output not found at {output_path}")
+                        output_audio = original_audio  # Fallback
+                    
+                    # Get correct reference text from metadata
+                    reference_text = self.get_reference_text_from_metadata(file_path)
+                    self.log(f"[Real Metrics] Reference text: '{reference_text}'")
+                    
+                    # Calculate real metrics for Original mode (Spanish INPUT vs English OUTPUT)
                     original_metrics = simple_metrics_calculator.calculate_cosine_similarity(
-                        original_audio, dummy_enhanced_audio, sample_rate=22050
+                        original_audio, output_audio, sample_rate=22050, mode="Original"
                     )
                     
-                    # Calculate ASR-BLEU for Original mode
+                    # Calculate ASR-BLEU for Original mode (transcribe English OUTPUT)
                     original_asr_bleu = simple_metrics_calculator.calculate_asr_bleu(
-                        dummy_enhanced_audio, "Hello, how are you today?"
+                        output_audio, reference_text, sample_rate=22050, mode="Original"
                     )
                     
                     # Calculate average lagging for Original mode
@@ -2318,9 +2373,9 @@ class StreamSpeechComparisonApp(QMainWindow):
                     # Calculate voice cloning metrics for Original mode (baseline)
                     from scipy.stats import pearsonr
                     
-                    min_length = min(len(original_audio), len(dummy_enhanced_audio))
+                    min_length = min(len(original_audio), len(output_audio))
                     original_norm = original_audio[:min_length]
-                    enhanced_norm = dummy_enhanced_audio[:min_length]
+                    enhanced_norm = output_audio[:min_length]
                     
                     # Calculate correlation
                     correlation, _ = pearsonr(original_norm, enhanced_norm)

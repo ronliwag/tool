@@ -1,5 +1,5 @@
-// Consolidated dependencies for the StreamSpeech Tool
-// GPU: install torch/torchaudio matching your CUDA first (see README)
+# Consolidated dependencies for the StreamSpeech Tool
+# GPU: install torch/torchaudio matching your CUDA first (see README)
 
 numpy>=1.21.0
 scipy>=1.9.0
