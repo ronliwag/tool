@@ -112,6 +112,9 @@ class StreamSpeechComparisonApp(QMainWindow):
         self.setMinimumSize(1200, 800)  # Allow resizing but with minimum size
         # Allow maximizing and resizing
         
+        # Initialize landing page state
+        self.show_landing_page = True
+        
         # Set dark theme matching Streamlit design
         self.setStyleSheet("""
             QMainWindow {
@@ -353,16 +356,26 @@ class StreamSpeechComparisonApp(QMainWindow):
     
     def setup_ui(self):
         """Setup the complete Streamlit-inspired user interface with Qt."""
-        # Create central widget
+        # Create central widget with stacked layout for landing page and main app
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         
-        # Create main layout (vertical to stack header on top)
-        self.main_layout = QVBoxLayout(self.central_widget)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        # Create stacked widget to switch between landing page and main app
+        self.stacked_widget = QStackedWidget()
+        main_layout = QVBoxLayout(self.central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(self.stacked_widget)
         
-        # Create Streamlit-inspired header
+        # Create landing page
+        self.create_landing_page()
+        
+        # Create main application page
+        self.create_main_app_page()
+        
+        # Show landing page initially
+        self.stacked_widget.setCurrentIndex(0)
+        
+        # Create Streamlit-inspired header (only for main app)
         self.create_streamlit_header()
         
         # Create main content area with side-by-side layout
@@ -370,6 +383,146 @@ class StreamSpeechComparisonApp(QMainWindow):
         
         # Apply Streamlit-inspired styling
         self.apply_streamlit_styling()
+    
+    def create_landing_page(self):
+        """Create the StreamSpeech landing page"""
+        landing_page = QWidget()
+        landing_page.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #f0f8ff, stop:0.5 #e6f3ff, stop:1 #ddeeff);
+            }
+        """)
+        
+        layout = QVBoxLayout(landing_page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(Qt.AlignCenter)
+        
+        # Main content container
+        content_frame = QFrame()
+        content_frame.setFixedSize(1200, 800)
+        content_layout = QVBoxLayout(content_frame)
+        content_layout.setAlignment(Qt.AlignCenter)
+        content_layout.setSpacing(40)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Logo section
+        logo_layout = QHBoxLayout()
+        logo_layout.setAlignment(Qt.AlignCenter)
+        logo_layout.setSpacing(8)
+        
+        # Logo dots
+        for color in ["#0284c7", "#2563eb", "#4f46e5"]:
+            dot = QLabel()
+            dot.setFixedSize(16, 16)
+            dot.setStyleSheet(f"background-color: {color}; border-radius: 8px;")
+            logo_layout.addWidget(dot)
+        
+        # Logo text
+        logo_text = QLabel("StreamSpeech")
+        logo_text.setStyleSheet("""
+            QLabel {
+                color: #111827;
+                font-size: 20px;
+                font-weight: 600;
+                margin-left: 8px;
+            }
+        """)
+        logo_layout.addWidget(logo_text)
+        
+        # Main heading
+        main_heading = QLabel("A MODIFIED HIFI-GAN VOCODER USING ODCONV AND GRC FOR EXPRESSIVE VOICE CLONING IN STREAMSPEECH'S REAL-TIME TRANSLATION")
+        main_heading.setStyleSheet("""
+            QLabel {
+                color: #111827;
+                font-size: 28px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 1.2;
+                padding: 0 40px;
+            }
+        """)
+        main_heading.setWordWrap(True)
+        main_heading.setAlignment(Qt.AlignCenter)
+        
+        # Description removed
+        
+        # CTA Button Container for centering
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setAlignment(Qt.AlignCenter)
+        
+        # CTA Button
+        cta_button = QPushButton("Try to test it out →")
+        cta_button.setFixedSize(250, 60)
+        cta_button.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #2563eb, stop:1 #1d4ed8);
+                color: white;
+                border: none;
+                border-radius: 30px;
+                font-size: 18px;
+                font-weight: 600;
+                padding: 0 20px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #1d4ed8, stop:1 #1e40af);
+                transform: translateY(-2px);
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #1e40af, stop:1 #1e3a8a);
+            }
+        """)
+        cta_button.clicked.connect(self.show_main_app)
+        
+        # Add button to centered container
+        button_layout.addWidget(cta_button)
+        
+        # Copyright
+        copyright_text = QLabel("Copyright 2025")
+        copyright_text.setStyleSheet("""
+            QLabel {
+                color: #6b7280;
+                font-size: 12px;
+                text-align: center;
+            }
+        """)
+        copyright_text.setAlignment(Qt.AlignCenter)
+        
+        # Add all elements to layout
+        content_layout.addLayout(logo_layout)
+        content_layout.addWidget(main_heading)
+        content_layout.addWidget(button_container)
+        content_layout.addWidget(copyright_text)
+        
+        # Center the content frame
+        layout.addWidget(content_frame, 0, Qt.AlignCenter)
+        
+        # Add to stacked widget
+        self.stacked_widget.addWidget(landing_page)
+    
+    def create_main_app_page(self):
+        """Create the main application page"""
+        main_app_page = QWidget()
+        
+        # Create main layout for the app
+        self.main_layout = QVBoxLayout(main_app_page)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        
+        # Add to stacked widget
+        self.stacked_widget.addWidget(main_app_page)
+        
+        # Store reference to main app page for later use
+        self.main_app_page = main_app_page
+    
+    def show_main_app(self):
+        """Switch to the main application view"""
+        self.stacked_widget.setCurrentIndex(1)
+        self.show_landing_page = False
     
     def create_streamlit_header(self):
         """Create modern glassmorphism navigation bar with proper spacing and balance."""
