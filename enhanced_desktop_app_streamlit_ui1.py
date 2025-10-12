@@ -103,7 +103,7 @@ except ImportError as e:
 
 
 class StreamSpeechComparisonApp(QMainWindow):
-    """Enhanced desktop application with complete Streamlit UI implementation."""
+    """Enhanced desktop application with complete Streamlit-inspired UI implementation."""
     
     def __init__(self):
         super().__init__()
@@ -832,12 +832,20 @@ class StreamSpeechComparisonApp(QMainWindow):
         self.original_latency_slider.setRange(320, 1000)
         self.original_latency_slider.setValue(320)
         self.original_latency_slider.setFixedWidth(160)
+        # Apply high-contrast styling so the handle/track are visible
+        self.original_latency_slider.setStyleSheet("""
+            QSlider::groove:horizontal { height: 8px; background: #1f2937; border-radius: 4px; }
+            QSlider::sub-page:horizontal { background: #E85A5A; border-radius: 4px; }
+            QSlider::add-page:horizontal { background: #4b5563; border-radius: 4px; }
+            QSlider::handle:horizontal { background: #E85A5A; border: 2px solid #ffffff; width: 16px; height: 16px; margin: -6px 0; border-radius: 8px; }
+        """)
         title_latency_row.addWidget(self.original_latency_slider)
         self.original_latency_value = QLabel("320 ms")
         self.original_latency_value.setStyleSheet("color: #111827; background-color: transparent;")
         title_latency_row.addWidget(self.original_latency_value)
-        # Sync value text
+        # Sync value text and log to backend for verification
         self.original_latency_slider.valueChanged.connect(lambda v: self.original_latency_value.setText(f"{v} ms"))
+        self.original_latency_slider.valueChanged.connect(lambda v: print(f"[LATENCY] Original slider -> {int(v)} ms"))
         header_layout.addLayout(title_latency_row)
         
         # Description
@@ -973,12 +981,20 @@ class StreamSpeechComparisonApp(QMainWindow):
         self.modified_latency_slider.setRange(160, 1000)
         self.modified_latency_slider.setValue(160)
         self.modified_latency_slider.setFixedWidth(160)
+        # Apply high-contrast styling so the handle/track are visible
+        self.modified_latency_slider.setStyleSheet("""
+            QSlider::groove:horizontal { height: 8px; background: #1f2937; border-radius: 4px; }
+            QSlider::sub-page:horizontal { background: #5AD29E; border-radius: 4px; }
+            QSlider::add-page:horizontal { background: #4b5563; border-radius: 4px; }
+            QSlider::handle:horizontal { background: #5AD29E; border: 2px solid #ffffff; width: 16px; height: 16px; margin: -6px 0; border-radius: 8px; }
+        """)
         title_latency_row.addWidget(self.modified_latency_slider)
         self.modified_latency_value = QLabel("160 ms")
         self.modified_latency_value.setStyleSheet("color: #111827; background-color: transparent;")
         title_latency_row.addWidget(self.modified_latency_value)
-        # Keep label in sync
+        # Sync value text and log to backend for verification
         self.modified_latency_slider.valueChanged.connect(lambda v: self.modified_latency_value.setText(f"{v} ms"))
+        self.modified_latency_slider.valueChanged.connect(lambda v: print(f"[LATENCY] Modified slider -> {int(v)} ms"))
         header_layout.addLayout(title_latency_row)
         
         # Description
@@ -2180,6 +2196,39 @@ class StreamSpeechComparisonApp(QMainWindow):
         except Exception as e:
             self.log(f"Error plotting waveform: {str(e)}")
     
+    def _sanitize_audio(self, samples: np.ndarray, sr: int) -> np.ndarray:
+        """Make generated audio safe and listenable: mono, de-DC, normalized, soft-clipped, and de-buzz.
+        - Removes NaN/Inf
+        - Subtracts mean (DC offset)
+        - Pre-emphasis high-pass (simple buzz reduction)
+        - Normalizes peak to 0.9 and applies gentle tanh soft clip
+        """
+        try:
+            y = np.asarray(samples, dtype=np.float32).flatten()
+            if y.size == 0:
+                return y
+            # Remove NaN/Inf
+            y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
+            # Remove DC offset
+            y = y - float(np.mean(y))
+            # Simple high-pass via pre-emphasis to reduce low-frequency buzz
+            # y_hp[n] = y[n] - a*y[n-1]
+            a = 0.97
+            if y.size > 1:
+                y_hp = np.empty_like(y)
+                y_hp[0] = y[0]
+                y_hp[1:] = y[1:] - a * y[:-1]
+                y = y_hp
+            # Peak normalize to 0.9
+            peak = float(np.max(np.abs(y)))
+            if peak > 0:
+                y = 0.9 * (y / peak)
+            # Gentle soft clip
+            y = np.tanh(y * 1.1)
+            return y.astype(np.float32)
+        except Exception:
+            return np.asarray(samples, dtype=np.float32).flatten()
+
     def process_audio_mode(self, mode):
         """Process audio with specified mode using REAL backend."""
         if self.is_processing:
@@ -2409,10 +2458,25 @@ class StreamSpeechComparisonApp(QMainWindow):
                                 print("=== SOP EVALUATION METRICS (FROM ACTUAL AUDIO) ===")
                                 print(f"Cosine Similarity (SIM): {real_metrics['cosine_similarity']:.4f}")
                                 print(f"Emotion Similarity: {real_metrics['emotion_similarity']:.4f}")
-                                print(f"ASR-BLEU Score: {asr_bleu_results['asr_bleu_score']:.4f}")
-                                print(f"ASR Transcription: {asr_bleu_results['transcribed_text']}")
-                                print(f"Reference Text: {asr_bleu_results['reference_text']}")
-                                print(f"Average Lagging: {real_metrics['real_time_factor']:.4f}")
+                                print(f"ASR-BLEU Score: {asr_bleu_results.get('asr_bleu_score', 0.0):.4f}")
+                                print(f"ASR Transcription: {asr_bleu_results.get('transcribed_text', 'N/A')}")
+                                print(f"Reference Text: {asr_bleu_results.get('reference_text', 'N/A')}")
+                                # Compute TRUE Average Lagging (frames + ms) from StreamSpeech logs
+                                try:
+                                    import sys as _sys, os as _os
+                                    _metrics_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
+                                    if _metrics_path not in _sys.path:
+                                        _sys.path.append(_metrics_path)
+                                    from simple_metrics_calculator import simple_metrics_calculator as _smc
+                                    import app as _app
+                                    _al_res = _smc.calculate_true_al_from_streamspeech_logs(getattr(_app, 'ASR', {}), getattr(_app, 'ST', {}))
+                                    _al_frames = _al_res.get('average_lagging')
+                                    _al_ms = _al_res.get('average_lagging_ms')
+                                    print(f"[AL] Modified TRUE AL: {(_al_frames if _al_frames is not None else 'N/A')} frames (~{(_al_ms if _al_ms is not None else 'N/A')} ms)")
+                                except Exception as _e_al:
+                                    print(f"[AL] Modified TRUE AL computation failed: {_e_al}")
+                                # Also show RTF for throughput reference (separate concept from AL)
+                                print(f"Average Lagging (RTF proxy): {real_metrics['real_time_factor']:.4f}")
                                 print(f"Real-time Factor: {real_metrics['real_time_factor']:.4f}")
                                 print(f"Processing Time: {real_metrics['processing_time']:.2f}s")
                                 print(f"Audio Duration: {real_metrics['audio_duration']:.2f}s")
@@ -2469,6 +2533,20 @@ class StreamSpeechComparisonApp(QMainWindow):
                 print("Using original StreamSpeech (completely untouched)")
                 reset()
                 run(file_path)
+                # Compute and log TRUE Average Lagging from StreamSpeech logs (frames and ms)
+                try:
+                    import sys as _sys, os as _os
+                    _metrics_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
+                    if _metrics_path not in _sys.path:
+                        _sys.path.append(_metrics_path)
+                    from simple_metrics_calculator import simple_metrics_calculator as _smc
+                    import app as _app
+                    _al_res = _smc.calculate_true_al_from_streamspeech_logs(getattr(_app, 'ASR', {}), getattr(_app, 'ST', {}))
+                    _al_frames = _al_res.get('average_lagging')
+                    _al_ms = _al_res.get('average_lagging_ms')
+                    print(f"[AL] Original TRUE AL: {(_al_frames if _al_frames is not None else 'N/A')} frames (~{(_al_ms if _al_ms is not None else 'N/A')} ms)")
+                except Exception as _e_al:
+                    print(f"[AL] Original TRUE AL computation failed: {_e_al}")
             
             # Calculate processing time
             processing_time = time.time() - start_time
@@ -2489,11 +2567,12 @@ class StreamSpeechComparisonApp(QMainWindow):
                         self.plot_waveform(self.original_output_ax, enhanced, _sr, self.colors['original_accent'])
                         if hasattr(self, 'original_output_canvas') and hasattr(self.original_output_canvas, 'draw'):
                             self.original_output_canvas.draw()
-                        # Save to temp for playback
+                        # Sanitize and save to temp for playback
                         tmp_out = os.path.join(os.path.dirname(__file__), "temp_original_output.wav")
                         try:
                             import soundfile as _sf
-                            _sf.write(tmp_out, enhanced, _sr)
+                            safe = self._sanitize_audio(enhanced, _sr)
+                            _sf.write(tmp_out, safe, _sr)
                             self.last_original_output = tmp_out
                         except Exception:
                             pass
@@ -2536,8 +2615,9 @@ class StreamSpeechComparisonApp(QMainWindow):
                     # Determine produced output source
                     if getattr(self, 'last_modified_output_path', None) and os.path.exists(self.last_modified_output_path):
                         out_samples, out_sr = _sf.read(self.last_modified_output_path, dtype="float32")
+                        out_samples = self._sanitize_audio(out_samples, int(out_sr))
                     elif getattr(self, 'last_enhanced_audio', None) is not None:
-                        out_samples = self.last_enhanced_audio
+                        out_samples = self._sanitize_audio(self.last_enhanced_audio, 22050)
                         try:
                             import app as _app
                             out_sr = int(getattr(_app, 'SAMPLE_RATE', 22050))
