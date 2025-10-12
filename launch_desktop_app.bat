@@ -6,6 +6,6 @@ cd /d "%~dp0"
 call .venv\Scripts\activate.bat
 set PYTHONPATH=%CD%
 echo Starting Enhanced Desktop App...
-python "Original Streamspeech\Modified Streamspeech\demo\enhanced_desktop_app_old1.py"
+python "Original Streamspeech\Modified Streamspeech\demo\enhanced_desktop_app_streamlit_ui1.py"
 pause
 
