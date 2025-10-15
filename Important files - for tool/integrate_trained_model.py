@@ -26,8 +26,8 @@ class TrainedModelLoader:
         self.speaker_extractor = None
         self.emotion_extractor = None
         
-        # Paths to trained models
-        self.trained_models_dir = os.path.join(os.path.dirname(__file__), 'trained_models')
+        # Paths to trained models (go up one directory from 'Important files - for tool')
+        self.trained_models_dir = os.path.join(os.path.dirname(__file__), '..', 'trained_models')
         self.checkpoints_dir = os.path.join(self.trained_models_dir, 'hifigan_checkpoints')
         self.config_path = os.path.join(self.trained_models_dir, 'model_config.json')
         

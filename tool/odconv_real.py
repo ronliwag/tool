@@ -119,7 +119,15 @@ class ODConvTranspose1D(nn.Module):
             film_params = self.film(cond)
             scale = film_params[:, : self.out_channels].unsqueeze(-1)
             shift = film_params[:, self.out_channels :].unsqueeze(-1)
+            
+            # CRITICAL FIX: Limit FiLM parameters to prevent extreme scaling
+            scale = torch.clamp(scale, -0.5, 0.5)  # Limit scale to reasonable range
+            shift = torch.clamp(shift, -0.5, 0.5)  # Limit shift to reasonable range
+            
             y = y * (1.0 + scale) + shift
+            
+            # Additional safety: Clamp output to prevent extreme values
+            y = torch.clamp(y, -2.0, 2.0)
         except Exception:
             pass
 

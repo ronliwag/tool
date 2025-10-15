@@ -133,9 +133,13 @@ class WorkingODConvIntegration:
                         if i < len(self.mrf_modules):
                             x = self.mrf_modules[i](x)
                     
-                    # Final processing
+                    # Final processing with amplitude control
                     x = self.conv_post(x)
                     x = torch.tanh(x)
+                    
+                    # CRITICAL FIX: Prevent extreme outputs that cause buzzing
+                    # Apply gentle amplitude limiting to prevent clipping
+                    x = torch.clamp(x, -0.95, 0.95)  # Leave small headroom
                     
                     return x
             
@@ -252,7 +256,26 @@ class WorkingODConvIntegration:
             enhanced_audio_np = enhanced_audio.squeeze(0).squeeze(0).cpu().numpy()
             
             print(f"[REAL ODConv] Generated audio shape: {enhanced_audio_np.shape}")
-            print(f"[REAL ODConv] Audio range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
+            print(f"[REAL ODConv] Audio range before normalization: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
+            
+            # CRITICAL FIX: Normalize audio to prevent buzzing/loud audio
+            # Check for extreme values that could cause buzzing
+            if abs(enhanced_audio_np.max()) > 1.0 or abs(enhanced_audio_np.min()) > 1.0:
+                print(f"[REAL ODConv] WARNING: Audio clipping detected! Max: {enhanced_audio_np.max():.4f}, Min: {enhanced_audio_np.min():.4f}")
+                # Normalize to safe range
+                max_val = max(abs(enhanced_audio_np.max()), abs(enhanced_audio_np.min()))
+                enhanced_audio_np = enhanced_audio_np / (max_val + 1e-8) * 0.95  # Scale to 95% of max range
+                print(f"[REAL ODConv] Audio normalized to range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
+            
+            # Additional safety: Clamp to valid audio range
+            enhanced_audio_np = np.clip(enhanced_audio_np, -1.0, 1.0)
+            
+            # Check for NaN or Inf values that could cause buzzing
+            if np.any(np.isnan(enhanced_audio_np)) or np.any(np.isinf(enhanced_audio_np)):
+                print("[REAL ODConv] ERROR: NaN or Inf values detected in audio! Replacing with zeros.")
+                enhanced_audio_np = np.nan_to_num(enhanced_audio_np, nan=0.0, posinf=0.0, neginf=0.0)
+            
+            print(f"[REAL ODConv] Final audio range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
             # Log ODConv gating weights if available
             try:
                 if hasattr(self.generator.ups[0], 'last_alphas') and self.generator.ups[0].last_alphas is not None:

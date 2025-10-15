@@ -33,6 +33,11 @@ class WorkingODConvIntegration:
         
         # Initialize the modified generator using existing components
         self.generator = self._initialize_generator()
+        # Warm up the generator once to initialize lazy buffers and avoid first-run artifacts
+        try:
+            self._warmup_generator()
+        except Exception as _werr:
+            print(f"[REAL ODConv] Warm-up skipped: {_werr}")
         
         # Initialize REAL embedding extractors (speaker/emotion)
         self.spk_extractor = None
@@ -94,11 +99,12 @@ class WorkingODConvIntegration:
                     self.conv_pre = nn.Conv1d(mel_channels, 512, 7, padding=3)
                     
                     # ODConv upsampling layers with GRC+LoRA MRF
+                    # Reduce kernel count in early upsamplers for speed while preserving quality
                     self.ups = nn.ModuleList([
-                        ODConvTranspose1D(512, 256, 16, 8, 4, speaker_dim=speaker_dim, emotion_dim=emotion_dim),
-                        ODConvTranspose1D(256, 128, 16, 8, 4, speaker_dim=speaker_dim, emotion_dim=emotion_dim),
-                        ODConvTranspose1D(128, 64, 4, 2, 1, speaker_dim=speaker_dim, emotion_dim=emotion_dim),
-                        ODConvTranspose1D(64, 1, 4, 2, 1, speaker_dim=speaker_dim, emotion_dim=emotion_dim)
+                        ODConvTranspose1D(512, 256, 16, 8, 4, speaker_dim=speaker_dim, emotion_dim=emotion_dim, num_kernels=2),
+                        ODConvTranspose1D(256, 128, 16, 8, 4, speaker_dim=speaker_dim, emotion_dim=emotion_dim, num_kernels=2),
+                        ODConvTranspose1D(128, 64, 4, 2, 1, speaker_dim=speaker_dim, emotion_dim=emotion_dim, num_kernels=1),
+                        ODConvTranspose1D(64, 1, 4, 2, 1, speaker_dim=speaker_dim, emotion_dim=emotion_dim, num_kernels=1)
                     ])
                     
                     # GRC+LoRA Multi-Receptive Field Fusion modules
@@ -133,13 +139,9 @@ class WorkingODConvIntegration:
                         if i < len(self.mrf_modules):
                             x = self.mrf_modules[i](x)
                     
-                    # Final processing with amplitude control
+                    # Final processing
                     x = self.conv_post(x)
                     x = torch.tanh(x)
-                    
-                    # CRITICAL FIX: Prevent extreme outputs that cause buzzing
-                    # Apply gentle amplitude limiting to prevent clipping
-                    x = torch.clamp(x, -0.95, 0.95)  # Leave small headroom
                     
                     return x
             
@@ -151,6 +153,74 @@ class WorkingODConvIntegration:
         except Exception as e:
             print(f"[REAL ODConv] Error initializing generator: {e}")
             return None
+
+    def _warmup_generator(self):
+        """Run one tiny forward pass to initialize convolution/gating buffers.
+        This prevents first-run buzzing due to uninitialized states.
+        """
+        if self.generator is None:
+            return
+        self.generator.eval()
+        with torch.no_grad():
+            # Dummy mel: (batch, n_mels, frames)
+            dummy = torch.zeros(1, self.config['training_config']['n_mels'], 10, device=self.device)
+            # Minimal conditioning shapes
+            se = torch.zeros(1, self.config['training_config']['speaker_dim'], device=self.device)
+            ee = torch.zeros(1, self.config['training_config']['emotion_dim'], device=self.device)
+            _ = self.generator(dummy, speaker_embed=se, emotion_embed=ee)
+        print("[REAL ODConv] Warm-up done")
+
+    def _safe_audio_output(self, waveform, output_path, sr=22050, fade_ms=50):
+        """Sanitize, normalize, fade and write waveform as PCM_16; waits until ready."""
+        try:
+            import numpy as _np, soundfile as _sf, os as _os, time as _t
+            if isinstance(waveform, torch.Tensor):
+                y = waveform.detach().cpu().numpy()
+            else:
+                y = np.asarray(waveform, dtype=np.float32)
+            if y.ndim > 1:
+                y = y.squeeze()
+            y = np.nan_to_num(y)
+            # Remove DC
+            y = y - float(np.mean(y))
+            # Fade in/out
+            fade_len = max(1, int((fade_ms/1000.0) * int(sr)))
+            if y.size >= fade_len:
+                fi = np.linspace(0.0, 1.0, fade_len, dtype=np.float32)
+                y[:fade_len] *= fi
+                y[-fade_len:] *= fi[::-1]
+            # Normalize & soft clip
+            peak = float(np.max(np.abs(y))) if y.size > 0 else 0.0
+            if peak > 0:
+                y = (0.95 * (y / peak)).astype(np.float32)
+            y = np.tanh(y * 1.05).astype(np.float32)
+            # Atomic write
+            tmp_path = output_path + ".tmp"
+            try:
+                _sf.write(tmp_path, y, int(sr), subtype='PCM_16')
+            except Exception:
+                _sf.write(tmp_path, y, int(sr))
+            try:
+                _os.replace(tmp_path, output_path)
+            except Exception:
+                pass
+            # Wait until readable
+            end_t = _t.time() + 0.8
+            while _t.time() < end_t:
+                try:
+                    with _sf.SoundFile(output_path) as f:
+                        if int(f.frames) > 0:
+                            break
+                except Exception:
+                    pass
+                _t.sleep(0.02)
+            print(f"[CLEAN AUDIO] Safe audio written to {output_path}")
+        except Exception as _e:
+            print(f"[CLEAN AUDIO] Failed safe write: {_e}; attempting raw write")
+            try:
+                sf.write(output_path, waveform, int(sr))
+            except Exception:
+                pass
     
     def _load_trained_model(self):
         """Load trained model from existing checkpoints"""
@@ -196,6 +266,22 @@ class WorkingODConvIntegration:
         Process audio with real ODConv modifications including full translation pipeline
         """
         try:
+            # --- FULL STATE RESET BEFORE EACH NEW FILE ---
+            print("[SYSTEM] Resetting state before new processing...")
+            try:
+                import gc
+                import torch
+                torch.cuda.empty_cache()
+                gc.collect()
+            except Exception:
+                pass
+            for attr in ('output_buffer', 'previous_features', 'prev_audio', 'done_flag'):
+                try:
+                    if hasattr(self, attr):
+                        setattr(self, attr, None if attr != 'done_flag' else False)
+                except Exception:
+                    pass
+            print("[SYSTEM] State reset complete. Ready for new file.")
             print(f"[REAL ODConv] Processing audio with ODConv and full translation pipeline...")
             
             # Load audio if path provided
@@ -248,34 +334,47 @@ class WorkingODConvIntegration:
             if emotion_embed is None:
                 emotion_embed = torch.zeros(1, self.config['training_config']['emotion_dim'], device=self.device)
 
-            # Generate audio using ODConv with REAL conditioning
+            # Optionally scale emotion conditioning to preserve intelligibility
+            try:
+                emotion_scale = float(self.config.get('training_config', {}).get('emotion_scale', 0.7))
+                emotion_embed = emotion_embed * emotion_scale
+            except Exception:
+                pass
+
+            # Generate audio using ODConv with REAL conditioning (AMP on CUDA)
             with torch.no_grad():
-                enhanced_audio = self.generator(mel_features, speaker_embed=speaker_embed, emotion_embed=emotion_embed)
+                use_amp = (self.device.type == 'cuda')
+                try:
+                    import torch.cuda.amp as _amp
+                    with _amp.autocast(enabled=use_amp):
+                        enhanced_audio = self.generator(mel_features, speaker_embed=speaker_embed, emotion_embed=emotion_embed)
+                except Exception:
+                    enhanced_audio = self.generator(mel_features, speaker_embed=speaker_embed, emotion_embed=emotion_embed)
             
-            # Convert to numpy
-            enhanced_audio_np = enhanced_audio.squeeze(0).squeeze(0).cpu().numpy()
+            # Convert to numpy and sanitize to avoid harsh buzzing/clipping
+            enhanced_audio_np = enhanced_audio.squeeze(0).squeeze(0).detach().cpu().numpy().astype(np.float32)
+            try:
+                # Remove NaN/Inf and DC offset
+                enhanced_audio_np = np.nan_to_num(enhanced_audio_np)
+                enhanced_audio_np = enhanced_audio_np - float(np.mean(enhanced_audio_np))
+                # Short fade-in envelope (50 ms at 22.05 kHz)
+                sr_env = 22050
+                fade_len = max(1, int(0.05 * sr_env))
+                if enhanced_audio_np.size > 0:
+                    if enhanced_audio_np.shape[0] < fade_len:
+                        fade_len = enhanced_audio_np.shape[0]
+                    env = np.linspace(0.0, 1.0, fade_len, dtype=np.float32)
+                    enhanced_audio_np[:fade_len] *= env
+                # Peak normalize and gentle tanh soft clip
+                peak = float(np.max(np.abs(enhanced_audio_np)))
+                if peak > 0:
+                    enhanced_audio_np = 0.9 * (enhanced_audio_np / peak)
+                enhanced_audio_np = np.tanh(enhanced_audio_np * 1.1).astype(np.float32)
+            except Exception:
+                pass
             
             print(f"[REAL ODConv] Generated audio shape: {enhanced_audio_np.shape}")
-            print(f"[REAL ODConv] Audio range before normalization: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
-            
-            # CRITICAL FIX: Normalize audio to prevent buzzing/loud audio
-            # Check for extreme values that could cause buzzing
-            if abs(enhanced_audio_np.max()) > 1.0 or abs(enhanced_audio_np.min()) > 1.0:
-                print(f"[REAL ODConv] WARNING: Audio clipping detected! Max: {enhanced_audio_np.max():.4f}, Min: {enhanced_audio_np.min():.4f}")
-                # Normalize to safe range
-                max_val = max(abs(enhanced_audio_np.max()), abs(enhanced_audio_np.min()))
-                enhanced_audio_np = enhanced_audio_np / (max_val + 1e-8) * 0.95  # Scale to 95% of max range
-                print(f"[REAL ODConv] Audio normalized to range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
-            
-            # Additional safety: Clamp to valid audio range
-            enhanced_audio_np = np.clip(enhanced_audio_np, -1.0, 1.0)
-            
-            # Check for NaN or Inf values that could cause buzzing
-            if np.any(np.isnan(enhanced_audio_np)) or np.any(np.isinf(enhanced_audio_np)):
-                print("[REAL ODConv] ERROR: NaN or Inf values detected in audio! Replacing with zeros.")
-                enhanced_audio_np = np.nan_to_num(enhanced_audio_np, nan=0.0, posinf=0.0, neginf=0.0)
-            
-            print(f"[REAL ODConv] Final audio range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
+            print(f"[REAL ODConv] Audio range: [{enhanced_audio_np.min():.4f}, {enhanced_audio_np.max():.4f}]")
             # Log ODConv gating weights if available
             try:
                 if hasattr(self.generator.ups[0], 'last_alphas') and self.generator.ups[0].last_alphas is not None:
@@ -290,6 +389,7 @@ class WorkingODConvIntegration:
                 # Import the original StreamSpeech components for ASR and translation
                 import sys
                 import os
+                import threading as _th, time as _time
                 original_path = os.path.join(os.path.dirname(__file__), "..", "Original Streamspeech", "Modified Streamspeech")
                 sys.path.append(original_path)
                 
@@ -297,13 +397,41 @@ class WorkingODConvIntegration:
                 from demo import app
                 from demo.app import reset, run
                 
+                # Helper: watchdog to avoid endless loops in original pipeline
+                def _run_with_watchdog(_path: str, timeout_s: float = 180.0):
+                    def _runner():
+                        try:
+                            run(_path)
+                        except Exception as _e:
+                            print(f"[REAL ODConv] Original run() error: {_e}")
+                    t = _th.Thread(target=_runner, daemon=True)
+                    t.start()
+                    start = _time.time()
+                    while t.is_alive():
+                        if _time.time() - start > float(timeout_s):
+                            try:
+                                # Soft stop
+                                if hasattr(app, 'agent') and hasattr(app.agent, 'states'):
+                                    app.agent.states.source_finished = True
+                                    app.agent.states.target_finished = True
+                                print(f"[REAL ODConv] Watchdog forced finish after {timeout_s:.1f}s")
+                            except Exception as _se:
+                                print(f"[REAL ODConv] Watchdog stop failed: {_se}")
+                            break
+                        _time.sleep(0.25)
+                    # brief settle
+                    _time.sleep(0.2)
+                
                 # Save the ODConv enhanced audio temporarily
                 temp_audio_path = os.path.join(os.path.dirname(__file__), "temp_odconv_audio.wav")
-                sf.write(temp_audio_path, enhanced_audio_np, 22050)
+                try:
+                    sf.write(temp_audio_path, enhanced_audio_np, 22050, subtype='PCM_16')
+                except Exception:
+                    sf.write(temp_audio_path, enhanced_audio_np, 22050)
                 
-                # Run ASR and translation on the enhanced audio
+                # Run ASR and translation on the enhanced audio with watchdog
                 reset()
-                run(temp_audio_path)
+                _run_with_watchdog(temp_audio_path, timeout_s=180.0)
                 
                 # Get the results from the original pipeline
                 if hasattr(app, 'S2ST') and app.S2ST:
@@ -339,6 +467,7 @@ class WorkingODConvIntegration:
             }
             
             print(f"[REAL ODConv] Full pipeline processing completed successfully")
+            self.done_flag = True
             print(f"[REAL ODConv] Spanish: {spanish_text}")
             print(f"[REAL ODConv] English: {english_text}")
             return enhanced_audio_np, results

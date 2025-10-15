@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import numpy as np
 import librosa
 import soundfile as sf
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -39,19 +40,48 @@ class SimpleMetricsCalculator:
         return self.whisper_model
     
     def _load_speaker_model(self):
-        """Load speaker embedding model for real speaker similarity"""
+        """Load REAL speaker embedding model for speaker verification"""
         if self.speaker_model is None:
             try:
-                from transformers import Wav2Vec2Processor, Wav2Vec2Model
-                print("[Real Metrics] Loading speaker embedding model...")
-                self.speaker_processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
-                self.speaker_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base-960h").to(self.device)
-                self.speaker_model.eval()
-                print("[Real Metrics] Speaker embedding model loaded successfully")
+                from real_ecapa_extractor import RealECAPAExtractor
+                print("[Real Metrics] Loading REAL speaker verification model (ECAPA-TDNN)...")
+                self.speaker_model = RealECAPAExtractor()
+                print("[Real Metrics] REAL speaker model loaded successfully")
             except Exception as e:
-                print(f"[Real Metrics] Warning: Could not load speaker model: {e}")
+                print(f"[Real Metrics] Warning: Could not load REAL speaker model: {e}")
                 self.speaker_model = None
         return self.speaker_model
+    
+    def _extract_speaker_embedding_from_array(self, audio_array, sample_rate):
+        """Extract speaker embedding from numpy array using ECAPA"""
+        import tempfile
+        import soundfile as sf
+        
+        # Resample to 16kHz for ECAPA
+        if sample_rate != 16000:
+            audio_16k = librosa.resample(audio_array, orig_sr=sample_rate, target_sr=16000)
+        else:
+            audio_16k = audio_array
+        
+        # Normalize
+        if np.abs(audio_16k).max() > 0:
+            audio_16k = audio_16k / np.abs(audio_16k).max()
+        
+        # Save to temp file for ECAPA extraction
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            temp_path = temp_file.name
+            sf.write(temp_path, audio_16k, 16000)
+        
+        try:
+            # Extract embedding using ECAPA
+            embedding = self.speaker_model.extract_real_speaker_embedding(temp_path)
+            return embedding
+        finally:
+            # Clean up temp file
+            try:
+                os.remove(temp_path)
+            except:
+                pass
     
     def calculate_real_bleu(self, hypothesis, reference):
         """
@@ -172,6 +202,7 @@ class SimpleMetricsCalculator:
         """
         Calculate REAL speaker and emotion similarity using actual embeddings
         NO artificial boosts - pure cosine similarity from real features
+        Returns BOTH raw [-1,1] and mapped [0,1] values
         
         Args:
             original_audio: numpy array of original audio
@@ -180,69 +211,99 @@ class SimpleMetricsCalculator:
             mode: "Original" or "Modified" (for logging only, does not affect calculation)
             
         Returns:
-            dict with real cosine similarity scores
+            dict with real cosine similarity scores (raw and mapped)
         """
         try:
             print(f"[Real Metrics] Calculating real cosine similarity for {mode} mode...")
             
-            # Method 1: Use deep learning speaker embeddings if available
+            # Guard: Check for identical buffers (silent fallback case)
+            if np.array_equal(original_audio, generated_audio):
+                print("[Real Metrics] WARNING: Identical audio buffers detected - skipping cosine")
+                return {
+                    'speaker_cosine_raw': None,
+                    'speaker_cosine_0to1': None,
+                    'emotion_heuristic_raw': None,
+                    'emotion_heuristic_0to1': None,
+                    'mode': mode,
+                    'method': 'skipped',
+                    'status': 'Identical buffers - undefined similarity'
+                }
+            
+            # Guard: Check for near-zero signals
+            orig_energy = np.sqrt(np.mean(original_audio ** 2))
+            gen_energy = np.sqrt(np.mean(generated_audio ** 2))
+            if orig_energy < 1e-6 or gen_energy < 1e-6:
+                print("[Real Metrics] WARNING: Near-silent audio detected - low confidence")
+                confidence = "low"
+            else:
+                confidence = "normal"
+            
+            # Method 1: Use REAL ECAPA-TDNN speaker embeddings if available
             speaker_model = self._load_speaker_model()
+            speaker_similarity_raw = None
             
             if speaker_model is not None:
-                # Use Wav2Vec2 embeddings for speaker similarity
+                # Use REAL ECAPA embeddings for speaker verification
                 try:
-                    # Resample to 16kHz for Wav2Vec2
-                    if sample_rate != 16000:
-                        orig_16k = librosa.resample(original_audio, orig_sr=sample_rate, target_sr=16000)
-                        gen_16k = librosa.resample(generated_audio, orig_sr=sample_rate, target_sr=16000)
+                    print("[Real Metrics] Extracting ECAPA speaker embeddings...")
+                    
+                    # Extract embeddings (already resampled to 16kHz inside helper)
+                    orig_embedding = self._extract_speaker_embedding_from_array(original_audio, sample_rate)
+                    gen_embedding = self._extract_speaker_embedding_from_array(generated_audio, sample_rate)
+                    
+                    if orig_embedding is not None and gen_embedding is not None:
+                        # L2-normalize embeddings
+                        orig_norm = orig_embedding / (torch.norm(orig_embedding) + 1e-8)
+                        gen_norm = gen_embedding / (torch.norm(gen_embedding) + 1e-8)
+                        
+                        # Calculate cosine similarity using PyTorch
+                        speaker_similarity_raw = torch.dot(orig_norm, gen_norm).item()
+                        
+                        print(f"[Real Metrics] Speaker similarity (ECAPA) raw [-1,1]: {speaker_similarity_raw:.4f}")
                     else:
-                        orig_16k = original_audio
-                        gen_16k = generated_audio
-                    
-                    # Get speaker embeddings
-                    with torch.no_grad():
-                        orig_inputs = self.speaker_processor(orig_16k, sampling_rate=16000, return_tensors="pt", padding=True)
-                        gen_inputs = self.speaker_processor(gen_16k, sampling_rate=16000, return_tensors="pt", padding=True)
-                        
-                        orig_inputs = {k: v.to(self.device) for k, v in orig_inputs.items()}
-                        gen_inputs = {k: v.to(self.device) for k, v in gen_inputs.items()}
-                        
-                        orig_embedding = self.speaker_model(**orig_inputs).last_hidden_state.mean(dim=1)
-                        gen_embedding = self.speaker_model(**gen_inputs).last_hidden_state.mean(dim=1)
-                        
-                        # Calculate cosine similarity
-                        speaker_similarity = F.cosine_similarity(orig_embedding, gen_embedding, dim=1).cpu().item()
-                    
-                    print(f"[Real Metrics] Speaker similarity (Wav2Vec2): {speaker_similarity:.4f}")
+                        print("[Real Metrics] ECAPA extraction failed, falling back to MFCC")
+                        speaker_model = None
                     
                 except Exception as e:
-                    print(f"[Real Metrics] Wav2Vec2 failed, falling back to MFCC: {e}")
+                    print(f"[Real Metrics] ECAPA failed, falling back to MFCC: {e}")
                     speaker_model = None
             
-            # Method 2: Fallback to MFCC-based similarity (still real, not boosted)
-            if speaker_model is None:
-                # Extract MFCC features for speaker characteristics
-                original_mfcc = librosa.feature.mfcc(y=original_audio, sr=sample_rate, n_mfcc=20)
-                generated_mfcc = librosa.feature.mfcc(y=generated_audio, sr=sample_rate, n_mfcc=20)
+            # Method 2: Fallback to MFCC-based similarity with CONSISTENT resampling
+            if speaker_model is None or speaker_similarity_raw is None:
+                # CRITICAL FIX: Resample BOTH signals to the SAME rate (16kHz) before MFCC
+                target_sr = 16000
+                if sample_rate != target_sr:
+                    print(f"[Real Metrics] Resampling both signals: {sample_rate}Hz -> {target_sr}Hz")
+                    original_audio_resampled = librosa.resample(original_audio, orig_sr=sample_rate, target_sr=target_sr)
+                    generated_audio_resampled = librosa.resample(generated_audio, orig_sr=sample_rate, target_sr=target_sr)
+                else:
+                    original_audio_resampled = original_audio
+                    generated_audio_resampled = generated_audio
+                
+                # Extract MFCC features at consistent SR
+                original_mfcc = librosa.feature.mfcc(y=original_audio_resampled, sr=target_sr, n_mfcc=20)
+                generated_mfcc = librosa.feature.mfcc(y=generated_audio_resampled, sr=target_sr, n_mfcc=20)
                 
                 # Average across time
                 original_speaker_vector = np.mean(original_mfcc, axis=1)
                 generated_speaker_vector = np.mean(generated_mfcc, axis=1)
                 
-                # Real cosine similarity - NO MODIFICATIONS
-                dot_product = np.dot(original_speaker_vector, generated_speaker_vector)
+                # L2-normalize before cosine
                 norm_orig = np.linalg.norm(original_speaker_vector)
                 norm_gen = np.linalg.norm(generated_speaker_vector)
                 
-                if norm_orig == 0 or norm_gen == 0:
-                    speaker_similarity = 0.0
+                if norm_orig < 1e-8 or norm_gen < 1e-8:
+                    speaker_similarity_raw = 0.0
+                    confidence = "undefined"
                 else:
-                    speaker_similarity = dot_product / (norm_orig * norm_gen)
+                    original_speaker_vector = original_speaker_vector / norm_orig
+                    generated_speaker_vector = generated_speaker_vector / norm_gen
+                    speaker_similarity_raw = float(np.dot(original_speaker_vector, generated_speaker_vector))
                 
-                print(f"[Real Metrics] Speaker similarity (MFCC): {speaker_similarity:.4f}")
+                print(f"[Real Metrics] Speaker similarity (MFCC) raw [-1,1]: {speaker_similarity_raw:.4f}")
             
-            # Calculate emotion similarity using spectral features
-            # Extract multiple spectral features
+            # Calculate heuristic emotion similarity using spectral features
+            # LABEL AS HEURISTIC since this is not true SER
             orig_centroid = librosa.feature.spectral_centroid(y=original_audio, sr=sample_rate)
             gen_centroid = librosa.feature.spectral_centroid(y=generated_audio, sr=sample_rate)
             
@@ -252,7 +313,7 @@ class SimpleMetricsCalculator:
             orig_zcr = librosa.feature.zero_crossing_rate(original_audio)
             gen_zcr = librosa.feature.zero_crossing_rate(generated_audio)
             
-            # Combine features for emotion representation
+            # Combine features for heuristic emotion representation
             orig_emotion_vector = np.concatenate([
                 np.mean(orig_centroid, axis=1),
                 np.mean(orig_rolloff, axis=1),
@@ -264,31 +325,41 @@ class SimpleMetricsCalculator:
                 np.mean(gen_zcr, axis=1)
             ])
             
-            # Real cosine similarity for emotion - NO MODIFICATIONS
-            dot_product_emotion = np.dot(orig_emotion_vector, gen_emotion_vector)
+            # L2-normalize before cosine
             norm_orig_emotion = np.linalg.norm(orig_emotion_vector)
             norm_gen_emotion = np.linalg.norm(gen_emotion_vector)
             
-            if norm_orig_emotion == 0 or norm_gen_emotion == 0:
-                emotion_similarity = 0.0
+            if norm_orig_emotion < 1e-8 or norm_gen_emotion < 1e-8:
+                emotion_similarity_raw = 0.0
             else:
-                emotion_similarity = dot_product_emotion / (norm_orig_emotion * norm_gen_emotion)
+                orig_emotion_vector = orig_emotion_vector / norm_orig_emotion
+                gen_emotion_vector = gen_emotion_vector / norm_gen_emotion
+                emotion_similarity_raw = float(np.dot(orig_emotion_vector, gen_emotion_vector))
             
-            print(f"[Real Metrics] Emotion similarity (spectral): {emotion_similarity:.4f}")
+            print(f"[Real Metrics] Emotion heuristic raw [-1,1]: {emotion_similarity_raw:.4f}")
             
-            # Clip to valid range [0, 1] but NO artificial boosts
-            speaker_similarity = float(np.clip(speaker_similarity, -1.0, 1.0))
-            emotion_similarity = float(np.clip(emotion_similarity, -1.0, 1.0))
+            # Clip raw values to valid range [-1, 1]
+            speaker_similarity_raw = float(np.clip(speaker_similarity_raw, -1.0, 1.0))
+            emotion_similarity_raw = float(np.clip(emotion_similarity_raw, -1.0, 1.0))
             
-            # Convert from [-1, 1] to [0, 1] range if needed
-            speaker_similarity = (speaker_similarity + 1.0) / 2.0
-            emotion_similarity = (emotion_similarity + 1.0) / 2.0
+            # Map to [0, 1] for display (CLEARLY LABELED as mapped)
+            speaker_similarity_0to1 = (speaker_similarity_raw + 1.0) / 2.0
+            emotion_similarity_0to1 = (emotion_similarity_raw + 1.0) / 2.0
             
             return {
-                'speaker_similarity': float(speaker_similarity),
-                'emotion_similarity': float(emotion_similarity),
+                # Raw values in [-1, 1] - TRUE cosine similarity
+                'speaker_cosine_raw': float(speaker_similarity_raw),
+                'emotion_heuristic_raw': float(emotion_similarity_raw),
+                # Mapped values in [0, 1] - for display only
+                'speaker_cosine_0to1': float(speaker_similarity_0to1),
+                'emotion_heuristic_0to1': float(emotion_similarity_0to1),
+                # Legacy fields for backward compatibility (mapped values)
+                'speaker_similarity': float(speaker_similarity_0to1),
+                'emotion_similarity': float(emotion_similarity_0to1),
+                # Metadata
                 'mode': mode,
-                'method': 'Wav2Vec2' if speaker_model is not None else 'MFCC',
+                'method': 'ECAPA-TDNN' if speaker_model is not None else 'MFCC',
+                'confidence': confidence,
                 'status': 'Real cosine similarity - no artificial adjustments'
             }
             
@@ -297,6 +368,10 @@ class SimpleMetricsCalculator:
             import traceback
             traceback.print_exc()
             return {
+                'speaker_cosine_raw': 0.0,
+                'speaker_cosine_0to1': 0.0,
+                'emotion_heuristic_raw': 0.0,
+                'emotion_heuristic_0to1': 0.0,
                 'speaker_similarity': 0.0,
                 'emotion_similarity': 0.0,
                 'status': f'Error: {str(e)}'

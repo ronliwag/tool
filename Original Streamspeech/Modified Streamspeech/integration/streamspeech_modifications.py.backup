@@ -175,12 +175,10 @@ class StreamSpeechModifications:
         try:
             print("[INIT] Initializing TTS component...")
             self.tts_component = EnglishTTSComponent(device=self.device)
-            self.tts_model = self.tts_component  # Alias for desktop app compatibility
             print("[INIT] TTS component initialized successfully")
         except Exception as e:
             print(f"[ERROR] Failed to initialize TTS component: {e}")
             self.tts_component = None
-            self.tts_model = None  # Ensure alias is also None on failure
     
     def initialize_asr_component(self):
         """Initialize ASR component"""
@@ -188,12 +186,10 @@ class StreamSpeechModifications:
             print("[INIT] Initializing ASR component...")
             from spanish_asr_component import SpanishASR
             self.asr_component = SpanishASR(device=self.device)
-            self.asr_model = self.asr_component  # Alias for desktop app compatibility
             print("[INIT] ASR component initialized successfully")
         except Exception as e:
             print(f"[ERROR] Failed to initialize ASR component: {e}")
             self.asr_component = None
-            self.asr_model = None  # Ensure alias is also None on failure
     
     def initialize_translation_component(self):
         """Initialize Translation component"""
@@ -201,12 +197,10 @@ class StreamSpeechModifications:
             print("[INIT] Initializing Translation component...")
             from spanish_english_translation import SpanishEnglishTranslator
             self.translation_component = SpanishEnglishTranslator(device=self.device)
-            self.translation_model = self.translation_component  # Alias for desktop app compatibility
             print("[INIT] Translation component initialized successfully")
         except Exception as e:
             print(f"[ERROR] Failed to initialize Translation component: {e}")
             self.translation_component = None
-            self.translation_model = None  # Ensure alias is also None on failure
     
     def initialize_trained_model_loader(self):
         """Initialize Trained Model Loader"""

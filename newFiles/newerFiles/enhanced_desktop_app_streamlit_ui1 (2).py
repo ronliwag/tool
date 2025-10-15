@@ -103,7 +103,7 @@ except ImportError as e:
 
 
 class StreamSpeechComparisonApp(QMainWindow):
-    """Enhanced desktop application with complete Streamlit UI implementation."""
+    """Enhanced desktop application with complete Streamlit-inspired UI implementation."""
     
     def __init__(self):
         super().__init__()
@@ -209,8 +209,9 @@ class StreamSpeechComparisonApp(QMainWindow):
                 _sr = getattr(_app, 'SAMPLE_RATE', 22050)
             except Exception:
                 _sr = 22050
-            pygame.mixer.pre_init(frequency=_sr, size=-16, channels=2, buffer=1024)
+            pygame.mixer.pre_init(frequency=_sr, size=-16, channels=2, buffer=2048)
             pygame.mixer.init()
+            pygame.mixer.set_num_channels(8)
             self.log(f"Pygame mixer initialized successfully with {_sr} Hz sample rate")
         except Exception as e:
             self.log(f"Warning: Could not initialize pygame mixer: {e}")
@@ -229,6 +230,172 @@ class StreamSpeechComparisonApp(QMainWindow):
         # Load configuration
         self.load_config()
     
+    def _ensure_mixer(self, target_sr: int):
+        """Ensure pygame mixer is initialized at the desired sample rate to prevent first-play artifacts.
+        Re-initializes only when the frequency differs. Keeps channels=2, size=-16, buffer 2048.
+        """
+        try:
+            if target_sr is None or target_sr <= 0:
+                return
+            current = pygame.mixer.get_init()
+            need_reinit = False
+            if current is None:
+                need_reinit = True
+            else:
+                cur_freq, cur_size, cur_ch = current
+                if int(cur_freq) != int(target_sr):
+                    need_reinit = True
+            if need_reinit:
+                try:
+                    pygame.mixer.quit()
+                except Exception:
+                    pass
+                try:
+                    pygame.mixer.pre_init(frequency=int(target_sr), size=-16, channels=2, buffer=2048)
+                    pygame.mixer.init()
+                    pygame.mixer.set_num_channels(8)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    def _prepare_playback(self, target_sr: int):
+        """Stop any existing playback, align mixer SR, and give a tiny settle time."""
+        try:
+            try:
+                pygame.mixer.music.stop()
+            except Exception:
+                pass
+            try:
+                pygame.mixer.stop()
+            except Exception:
+                pass
+            self._ensure_mixer(int(target_sr) if target_sr else 22050)
+            try:
+                import time as _t
+                _t.sleep(0.02)
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    def _prepare_modified_output_cache(self, source_path: str) -> str:
+        """Create a stabilized 22.05kHz mono PCM16 playback cache for Modified output.
+        - Resamples any input SR to 22050
+        - Forces mono
+        - Sanitizes audio and adds a 10ms leading silence to avoid first-frame clicks
+        Returns the cache path to play.
+        """
+        try:
+            import os as _os
+            import numpy as _np
+            import soundfile as _sf
+            import librosa as _lb
+
+            if not (source_path and _os.path.exists(source_path)):
+                return source_path
+
+            samples, sr = _sf.read(source_path, dtype='float32')
+            # To mono
+            if isinstance(samples, list):
+                samples = _np.asarray(samples, dtype=_np.float32)
+            if isinstance(samples, _np.ndarray) and samples.ndim > 1:
+                samples = samples[:, 0].astype(_np.float32)
+            else:
+                samples = _np.asarray(samples, dtype=_np.float32)
+
+            # Resample if needed to 22050
+            target_sr = 22050
+            if int(sr) != target_sr:
+                try:
+                    samples = _lb.resample(samples, orig_sr=int(sr), target_sr=target_sr)
+                except Exception:
+                    # Fallback: simple decimate/interpolate with numpy if librosa fails
+                    ratio = float(target_sr) / float(sr)
+                    idx = _np.round(_np.arange(0, len(samples) * ratio) / ratio).astype(int)
+                    idx = _np.clip(idx, 0, len(samples) - 1)
+                    samples = samples[idx]
+                sr = target_sr
+            else:
+                sr = int(sr)
+
+            # Sanitize and add short leading silence (50ms) to avoid first-buffer edge
+            try:
+                samples = self._sanitize_audio(samples, sr)
+            except Exception:
+                samples = _np.asarray(samples, dtype=_np.float32)
+            lead = _np.zeros(max(1, int(0.05 * sr)), dtype=_np.float32)
+            safe = _np.concatenate([lead, samples])
+
+            cache_dir = _os.path.dirname(__file__)
+            cache_path = _os.path.join(cache_dir, 'playback_cache_modified.wav')
+            tmp_path = _os.path.join(cache_dir, 'playback_cache_modified.tmp')
+            try:
+                _sf.write(tmp_path, safe, sr, subtype='PCM_16')
+            except Exception:
+                _sf.write(tmp_path, safe, sr)
+            try:
+                _os.replace(tmp_path, cache_path)
+            except Exception:
+                pass
+            return cache_path
+        except Exception:
+            return source_path
+
+    def _write_cache_from_array(self, samples, sr: int = 22050) -> str:
+        """Create the stabilized playback cache from an in-memory array.
+        Ensures PCM_16 @ 22.05kHz mono with a short leading silence.
+        """
+        try:
+            import numpy as _np, soundfile as _sf, os as _os
+            y = _np.asarray(samples, dtype=_np.float32).flatten()
+            if int(sr) != 22050:
+                try:
+                    import librosa as _lb
+                    y = _lb.resample(y, orig_sr=int(sr), target_sr=22050)
+                    sr = 22050
+                except Exception:
+                    sr = int(sr)
+            try:
+                y = self._sanitize_audio(y, int(sr))
+            except Exception:
+                y = _np.asarray(y, dtype=_np.float32)
+            lead = _np.zeros(max(1, int(0.05 * int(sr))), dtype=_np.float32)
+            y_safe = _np.concatenate([lead, y])
+            cache_dir = _os.path.dirname(__file__)
+            cache_path = _os.path.join(cache_dir, 'playback_cache_modified.wav')
+            tmp_path = _os.path.join(cache_dir, 'playback_cache_modified.tmp')
+            try:
+                _sf.write(tmp_path, y_safe, int(sr), subtype='PCM_16')
+            except Exception:
+                _sf.write(tmp_path, y_safe, int(sr))
+            try:
+                _os.replace(tmp_path, cache_path)
+            except Exception:
+                pass
+            return cache_path
+        except Exception:
+            return None
+
+    def _wait_until_audio_ready(self, path: str, timeout_ms: int = 500) -> bool:
+        """Poll until the audio file can be read with non-zero frames."""
+        try:
+            import os as _os, soundfile as _sf, time as _t
+            if not (path and _os.path.exists(path)):
+                return False
+            end_t = _t.time() + (timeout_ms / 1000.0)
+            while _t.time() < end_t:
+                try:
+                    with _sf.SoundFile(path) as f:
+                        if int(f.frames) > 0 and int(f.samplerate) > 0:
+                            return True
+                except Exception:
+                    pass
+                _t.sleep(0.02)
+            return True  # best effort
+        except Exception:
+            return True
+
     def initialize_agents_legacy(self):
         """Initialize Defense-Ready StreamSpeech - Original remains untouched."""
         try:
@@ -353,23 +520,185 @@ class StreamSpeechComparisonApp(QMainWindow):
     
     def setup_ui(self):
         """Setup the complete Streamlit-inspired user interface with Qt."""
-        # Create central widget
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        
-        # Create main layout (vertical to stack header on top)
-        self.main_layout = QVBoxLayout(self.central_widget)
+        # Use a stacked widget so we can show a landing page first, then the app
+        self.stacked_widget = QStackedWidget()
+        self.setCentralWidget(self.stacked_widget)
+
+        # Build landing page (first page)
+        self.landing_page = self.create_landing_page_widget()
+
+        # Build the actual app page using the existing layout/components
+        self.app_page = QWidget()
+        # Create main layout (vertical to stack header on top) on the app page
+        self.main_layout = QVBoxLayout(self.app_page)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        
+
         # Create Streamlit-inspired header
         self.create_streamlit_header()
-        
+
         # Create main content area with side-by-side layout
         self.create_main_content_area()
-        
+
         # Apply Streamlit-inspired styling
         self.apply_streamlit_styling()
+
+        # Add both pages to the stack and show the landing page by default
+        self.stacked_widget.addWidget(self.landing_page)
+        self.stacked_widget.addWidget(self.app_page)
+        self.stacked_widget.setCurrentWidget(self.landing_page)
+
+    def create_landing_page_widget(self):
+        """Create a modern landing page inspired by the provided Streamlit version.
+        The CTA button switches to the main application and focuses on Modified mode.
+        """
+        container = QWidget()
+        container.setStyleSheet("""
+            QWidget { background-color: #e6f3ff; }
+            #LandingCard {
+                background-color: rgba(255,255,255,0.85);
+                border: 1px solid #dbeafe;
+                border-radius: 16px;
+            }
+        """)
+
+        outer = QVBoxLayout(container)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+
+        # Main content wrapper fills available space
+        content = QWidget()
+        content.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #f0f8ff,
+                    stop:0.5 #e6f3ff,
+                    stop:1 #ddeeff);
+            }
+        """)
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(32, 32, 32, 32)
+        content_layout.setSpacing(24)
+        content_layout.setAlignment(Qt.AlignCenter)
+
+        # Card to limit max width and enhance readability
+        card = QFrame()
+        card.setObjectName("LandingCard")
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(36, 36, 36, 36)
+        card_layout.setSpacing(18)
+        card.setMaximumWidth(980)
+
+        # Logo/title row (minimal, no emojis)
+        self.lp_logo = QLabel("StreamSpeech")
+        self.lp_logo.setFont(QFont('Inter', 22, QFont.Bold))
+        self.lp_logo.setStyleSheet("color: #0f172a; background-color: transparent;")
+        card_layout.addWidget(self.lp_logo, 0, Qt.AlignHCenter)
+
+        # Main heading from the landing page content
+        self.lp_heading = QLabel("A MODIFIED HIFI-GAN VOCODER USING ODCONV AND GRC FOR EXPRESSIVE VOICE CLONING IN STREAMSPEECH'S REAL-TIME TRANSLATION")
+        self.lp_heading.setWordWrap(True)
+        self.lp_heading.setAlignment(Qt.AlignCenter)
+        self.lp_heading.setFont(QFont('Inter', 28, QFont.Black))
+        self.lp_heading.setStyleSheet("color: #111827; background-color: transparent;")
+        card_layout.addWidget(self.lp_heading)
+
+        # Description
+        self.lp_desc = QLabel("A simultaneous translation that finally preserves your expressive voice and unique identity by leveraging an enhanced HiFi-GAN vocoder architecture for seamless voice cloning.")
+        self.lp_desc.setWordWrap(True)
+        self.lp_desc.setAlignment(Qt.AlignCenter)
+        self.lp_desc.setFont(QFont('Inter', 14))
+        self.lp_desc.setStyleSheet("color: #374151; background-color: transparent;")
+        card_layout.addWidget(self.lp_desc)
+
+        # Call-to-action button
+        self.lp_cta = QPushButton("Try to test it out")
+        self.lp_cta.setCursor(Qt.PointingHandCursor)
+        self.lp_cta.setFont(QFont('Inter', 14, QFont.Bold))
+        self.lp_cta.setStyleSheet("""
+            QPushButton {
+                background-color: #2563eb;
+                color: white;
+                border: none;
+                border-radius: 24px;
+                padding: 12px 28px;
+            }
+            QPushButton:hover { background-color: #1d4ed8; }
+            QPushButton:pressed { background-color: #1e40af; }
+        """)
+        self.lp_cta.clicked.connect(self.show_main_app)
+        card_layout.addWidget(self.lp_cta, 0, Qt.AlignHCenter)
+
+        # Copyright
+        copyright_lbl = QLabel("Copyright 2025")
+        copyright_lbl.setAlignment(Qt.AlignCenter)
+        copyright_lbl.setStyleSheet("color: #6b7280; background-color: transparent;")
+        card_layout.addWidget(copyright_lbl)
+
+        # Add card to content and content to outer
+        content_layout.addWidget(card, 0, Qt.AlignCenter)
+
+        outer.addWidget(content)
+
+        return container
+
+    def resizeEvent(self, event):
+        """Keep landing page typography responsive to window size."""
+        try:
+            self.update_landing_typography()
+        except Exception:
+            pass
+        return super().resizeEvent(event)
+
+    def update_landing_typography(self):
+        """Scale landing page fonts based on current window width for better balance."""
+        try:
+            if not hasattr(self, 'lp_heading'):
+                return
+            w = max(800, self.width())
+            # Heading between 22 and 34
+            h_size = int(min(max(w / 60.0, 22), 34))
+            d_size = int(min(max(w / 110.0, 12), 16))
+            logo_size = int(min(max(w / 80.0, 18), 24))
+            self.lp_heading.setFont(QFont('Inter', h_size, QFont.Black))
+            self.lp_desc.setFont(QFont('Inter', d_size))
+            self.lp_logo.setFont(QFont('Inter', logo_size, QFont.Bold))
+            self.lp_cta.setFont(QFont('Inter', max(12, d_size), QFont.Bold))
+        except Exception:
+            pass
+
+    def show_main_app(self):
+        """Switch to the main application page with Modified mode emphasis."""
+        try:
+            self.current_mode = "Modified"
+        except Exception:
+            pass
+        try:
+            self.stacked_widget.setCurrentWidget(self.app_page)
+        except Exception:
+            pass
+    
+    def _soft_reset_processing_state(self):
+        """Attempt to stop any lingering processing from previous runs and clear states."""
+        try:
+            # Stop playback
+            try:
+                pygame.mixer.music.stop()
+                pygame.mixer.stop()
+            except Exception:
+                pass
+            # Signal Original pipeline to finish if still running
+            try:
+                import app as _app
+                if hasattr(_app, 'agent') and hasattr(_app.agent, 'states'):
+                    _app.agent.states.source_finished = True
+                    _app.agent.states.target_finished = True
+            except Exception:
+                pass
+            # Clear UI processing flag
+            self.is_processing = False
+        except Exception:
+            pass
     
     def create_streamlit_header(self):
         """Create modern glassmorphism navigation bar with proper spacing and balance."""
@@ -748,6 +1077,53 @@ class StreamSpeechComparisonApp(QMainWindow):
                     self.modified_output_canvas.draw()
             except Exception:
                 pass
+            # Reset transcriptions (input/output for both models) and global text labels
+            try:
+                if hasattr(self, 'original_input_transcription'):
+                    self.original_input_transcription.setText("")
+                if hasattr(self, 'original_output_transcription'):
+                    self.original_output_transcription.setText("")
+                if hasattr(self, 'modified_input_transcription'):
+                    self.modified_input_transcription.setText("")
+                if hasattr(self, 'modified_output_transcription'):
+                    self.modified_output_transcription.setText("")
+                if hasattr(self, 'spanish_text_label'):
+                    self.spanish_text_label.setText("")
+                if hasattr(self, 'english_text_label'):
+                    self.english_text_label.setText("")
+            except Exception:
+                pass
+            # Reset performance metrics (section 4)
+            try:
+                if hasattr(self, 'original_processing_time'):
+                    self.original_processing_time.setText("Processing Time: --")
+                if hasattr(self, 'original_real_time_factor'):
+                    self.original_real_time_factor.setText("Real-time Factor: --")
+                if hasattr(self, 'original_latency'):
+                    self.original_latency.setText("Latency: --")
+                if hasattr(self, 'modified_processing_time'):
+                    self.modified_processing_time.setText("Processing Time: --")
+                if hasattr(self, 'modified_real_time_factor'):
+                    self.modified_real_time_factor.setText("Real-time Factor: --")
+                if hasattr(self, 'modified_latency'):
+                    self.modified_latency.setText("Latency: --")
+            except Exception:
+                pass
+            # Reset comparison metrics (section 5)
+            try:
+                if hasattr(self, 'speaker_similarity_label'):
+                    self.speaker_similarity_label.setText("Original: -- | Modified: --")
+                if hasattr(self, 'emotion_similarity_label'):
+                    self.emotion_similarity_label.setText("Original: -- | Modified: --")
+                if hasattr(self, 'asr_bleu_label'):
+                    self.asr_bleu_label.setText("Original: -- | Modified: --")
+                if hasattr(self, 'avg_lagging_label'):
+                    self.avg_lagging_label.setText("Original: -- | Modified: --")
+                # Clear in-memory metrics cache
+                if hasattr(self, 'metrics_state') and isinstance(self.metrics_state, dict):
+                    self.metrics_state = {'original': {}, 'modified': {}}
+            except Exception:
+                pass
             self.log("Cleared current file and reset state. Ready for a new upload.")
         except Exception as e:
             self.log(f"Error clearing file: {e}")
@@ -832,12 +1208,24 @@ class StreamSpeechComparisonApp(QMainWindow):
         self.original_latency_slider.setRange(320, 1000)
         self.original_latency_slider.setValue(320)
         self.original_latency_slider.setFixedWidth(160)
+        # Apply high-contrast styling so the handle/track are visible
+        self.original_latency_slider.setStyleSheet("""
+            QSlider::groove:horizontal { height: 8px; background: #1f2937; border-radius: 4px; }
+            QSlider::sub-page:horizontal { background: #E85A5A; border-radius: 4px; }
+            QSlider::add-page:horizontal { background: #4b5563; border-radius: 4px; }
+            QSlider::handle:horizontal { background: #E85A5A; border: 2px solid #ffffff; width: 16px; height: 16px; margin: -6px 0; border-radius: 8px; }
+        """)
         title_latency_row.addWidget(self.original_latency_slider)
         self.original_latency_value = QLabel("320 ms")
         self.original_latency_value.setStyleSheet("color: #111827; background-color: transparent;")
         title_latency_row.addWidget(self.original_latency_value)
-        # Sync value text
+        # Sync value text and log to backend for verification
         self.original_latency_slider.valueChanged.connect(lambda v: self.original_latency_value.setText(f"{v} ms"))
+        self.original_latency_slider.valueChanged.connect(lambda v: print(f"[LATENCY] Original slider -> {int(v)} ms"))
+        try:
+            self.original_latency_slider.valueChanged.connect(lambda _v: self.refresh_latency_labels())
+        except Exception:
+            pass
         header_layout.addLayout(title_latency_row)
         
         # Description
@@ -973,12 +1361,24 @@ class StreamSpeechComparisonApp(QMainWindow):
         self.modified_latency_slider.setRange(160, 1000)
         self.modified_latency_slider.setValue(160)
         self.modified_latency_slider.setFixedWidth(160)
+        # Apply high-contrast styling so the handle/track are visible
+        self.modified_latency_slider.setStyleSheet("""
+            QSlider::groove:horizontal { height: 8px; background: #1f2937; border-radius: 4px; }
+            QSlider::sub-page:horizontal { background: #5AD29E; border-radius: 4px; }
+            QSlider::add-page:horizontal { background: #4b5563; border-radius: 4px; }
+            QSlider::handle:horizontal { background: #5AD29E; border: 2px solid #ffffff; width: 16px; height: 16px; margin: -6px 0; border-radius: 8px; }
+        """)
         title_latency_row.addWidget(self.modified_latency_slider)
         self.modified_latency_value = QLabel("160 ms")
         self.modified_latency_value.setStyleSheet("color: #111827; background-color: transparent;")
         title_latency_row.addWidget(self.modified_latency_value)
-        # Keep label in sync
+        # Sync value text and log to backend for verification
         self.modified_latency_slider.valueChanged.connect(lambda v: self.modified_latency_value.setText(f"{v} ms"))
+        self.modified_latency_slider.valueChanged.connect(lambda v: print(f"[LATENCY] Modified slider -> {int(v)} ms"))
+        try:
+            self.modified_latency_slider.valueChanged.connect(lambda _v: self.refresh_latency_labels())
+        except Exception:
+            pass
         header_layout.addLayout(title_latency_row)
         
         # Description
@@ -1100,7 +1500,7 @@ class StreamSpeechComparisonApp(QMainWindow):
                    ha='center', va='center', transform=ax.transAxes,
                    color=self.colors['text_muted'], fontsize=12, style='italic')
             ax.set_xlim(0, 1)
-            ax.set_ylim(0, 1)
+            ax.set_ylim(-1, 1)
             ax.set_xticks([])
             ax.set_yticks([])
             
@@ -1306,6 +1706,18 @@ class StreamSpeechComparisonApp(QMainWindow):
             if audio_type == "input":
                 # Play original input audio
                 if self.selected_file and os.path.exists(self.selected_file):
+                    # Match mixer SR to file to avoid first-play buzzing
+                    try:
+                        import soundfile as _sf
+                        with _sf.SoundFile(self.selected_file) as _f:
+                            _sr = int(_f.samplerate)
+                    except Exception:
+                        _sr = 22050
+                    self._prepare_playback(_sr)
+                    try:
+                        pygame.mixer.music.unload()
+                    except Exception:
+                        pass
                     pygame.mixer.music.load(self.selected_file)
                     pygame.mixer.music.play()
                     self.log(f"Playing {mode} input audio: {os.path.basename(self.selected_file)}")
@@ -1315,25 +1727,93 @@ class StreamSpeechComparisonApp(QMainWindow):
                 # Play processed output audio
                 if mode == "original":
                     # For original mode, we need to check if there's processed audio
-                    if hasattr(self, 'last_original_output') and self.last_original_output:
-                        pygame.mixer.music.load(self.last_original_output)
-                        pygame.mixer.music.play()
+                    if hasattr(self, 'last_original_output') and self.last_original_output and os.path.exists(self.last_original_output):
+                        # Align mixer SR and prefer Sound channel to bypass resampler
+                        try:
+                            import soundfile as _sf
+                            with _sf.SoundFile(self.last_original_output) as _f:
+                                _sr = int(_f.samplerate)
+                        except Exception:
+                            _sr = 22050
+                        self._prepare_playback(_sr)
+                        try:
+                            _snd = pygame.mixer.Sound(self.last_original_output)
+                            _snd.play()
+                        except Exception:
+                            try:
+                                pygame.mixer.music.unload()
+                            except Exception:
+                                pass
+                            pygame.mixer.music.load(self.last_original_output)
+                            pygame.mixer.music.play()
                         self.log(f"Playing {mode} output audio")
                     else:
-                        self.log("No original output audio available")
+                        # Fallback: try app.S2ST if present, then save temp PCM_16
+                        try:
+                            import app as _app
+                            if hasattr(_app, 'S2ST') and _app.S2ST is not None:
+                                import numpy as _np
+                                tmp = os.path.join(os.path.dirname(__file__), "temp_original_output.wav")
+                                arr = _np.asarray(_app.S2ST, dtype=_np.float32)
+                                _sr = int(getattr(_app, 'SAMPLE_RATE', 22050))
+                                arr = self._sanitize_audio(arr, _sr)
+                                import soundfile as _sf
+                                try:
+                                    _sf.write(tmp, arr, _sr, subtype='PCM_16')
+                                except Exception:
+                                    _sf.write(tmp, arr, _sr)
+                                self.last_original_output = tmp
+                                self._prepare_playback(_sr)
+                                try:
+                                    _snd = pygame.mixer.Sound(tmp)
+                                    _snd.play()
+                                except Exception:
+                                    try:
+                                        pygame.mixer.music.unload()
+                                    except Exception:
+                                        pass
+                                    pygame.mixer.music.load(tmp)
+                                    pygame.mixer.music.play()
+                                self.log(f"Playing {mode} output audio (from app.S2ST)")
+                            else:
+                                self.log("No original output audio available")
+                        except Exception as _e:
+                            self.log(f"Original output playback unavailable: {_e}")
                 else:  # modified mode
                     if getattr(self, 'last_modified_output_path', None) and os.path.exists(self.last_modified_output_path):
-                        pygame.mixer.music.load(self.last_modified_output_path)
-                        pygame.mixer.music.play()
+                        # Build a stabilized 22.05kHz mono PCM16 cache and play from it
+                        cache = self._prepare_modified_output_cache(self.last_modified_output_path)
+                        self._prepare_playback(22050)
+                        try:
+                            sound = pygame.mixer.Sound(cache)
+                            sound.play()
+                        except Exception:
+                            pygame.mixer.music.unload()
+                            pygame.mixer.music.load(cache)
+                            pygame.mixer.music.play()
                         self.log(f"Playing {mode} output audio")
                     elif hasattr(self, 'last_enhanced_audio') and self.last_enhanced_audio is not None:
                         # Save enhanced audio temporarily and play it (force 22050 Hz to mirror old app)
                         temp_path = os.path.join(os.path.dirname(__file__), "temp_modified_output.wav")
                         _sr = 22050
                         import soundfile as sf
-                        sf.write(temp_path, self.last_enhanced_audio, _sr)
-                        pygame.mixer.music.load(temp_path)
-                        pygame.mixer.music.play()
+                        try:
+                            safe = self._sanitize_audio(self.last_enhanced_audio, _sr)
+                        except Exception:
+                            safe = self.last_enhanced_audio
+                        try:
+                            sf.write(temp_path, safe, _sr, subtype='PCM_16')
+                        except Exception:
+                            sf.write(temp_path, safe, _sr)
+                        # Reinit mixer to 22050 to match our temp file and settle
+                        self._prepare_playback(_sr)
+                        try:
+                            sound = pygame.mixer.Sound(temp_path)
+                            sound.play()
+                        except Exception:
+                            pygame.mixer.music.unload()
+                            pygame.mixer.music.load(temp_path)
+                            pygame.mixer.music.play()
                         self.log(f"Playing {mode} output audio")
                     else:
                         self.log("No modified output audio available")
@@ -1499,6 +1979,25 @@ class StreamSpeechComparisonApp(QMainWindow):
         
         metrics_layout.addWidget(metrics_grid)
         parent_layout.addWidget(metrics_frame)
+
+        # Initialize latency label values immediately from sliders
+        try:
+            self.refresh_latency_labels()
+        except Exception:
+            pass
+
+    def refresh_latency_labels(self):
+        """Refresh the latency text in the Performance Metrics section from slider values."""
+        try:
+            if hasattr(self, 'original_latency') and hasattr(self, 'original_latency_slider'):
+                self.original_latency.setText(f"Latency: {int(self.original_latency_slider.value())} ms")
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'modified_latency') and hasattr(self, 'modified_latency_slider'):
+                self.modified_latency.setText(f"Latency: {int(self.modified_latency_slider.value())} ms")
+        except Exception:
+            pass
     
     def create_simultaneous_playback_section(self, parent_layout):
         """Create simultaneous playback section."""
@@ -1631,7 +2130,14 @@ class StreamSpeechComparisonApp(QMainWindow):
                         temp_path = os.path.join(os.path.dirname(__file__), "temp_modified_output.wav")
                         _sr = 22050
                         import soundfile as _sf
-                        _sf.write(temp_path, self.last_enhanced_audio, _sr)
+                        try:
+                            _safe = self._sanitize_audio(self.last_enhanced_audio, _sr)
+                        except Exception:
+                            _safe = self.last_enhanced_audio
+                        try:
+                            _sf.write(temp_path, _safe, _sr, subtype='PCM_16')
+                        except Exception:
+                            _sf.write(temp_path, _safe, _sr)
                         self.last_modified_output_path = temp_path
                         output_path = temp_path
                     except Exception as _e:
@@ -1644,6 +2150,7 @@ class StreamSpeechComparisonApp(QMainWindow):
             try:
                 if not pygame.mixer.get_init():
                     pygame.mixer.init()
+                    pygame.mixer.set_num_channels(8)
             except Exception:
                 pass
 
@@ -1653,6 +2160,7 @@ class StreamSpeechComparisonApp(QMainWindow):
                 try:
                     # Use music channel for input
                     pygame.mixer.music.stop()
+                    pygame.mixer.music.unload()
                     pygame.mixer.music.load(input_path)
                     pygame.mixer.music.play()
                     self.log(f"Simultaneous: Playing {mode} input now")
@@ -1662,14 +2170,31 @@ class StreamSpeechComparisonApp(QMainWindow):
             def _play_output_after_delay():
                 try:
                     time.sleep(max(0, latency_ms) / 1000.0)
-                    # Prefer Sound for overlap; fallback to music if needed
+                        # Prefer Sound for overlap; fallback to music if needed
                     try:
+                        
+                        # Ensure mixer SR matches the output file
+                        try:
+                            import soundfile as _sf
+                            _dat, _sr = _sf.read(output_path, dtype='float32')
+                            self._ensure_mixer(int(_sr))
+                        except Exception:
+                            pass
+
                         sound = pygame.mixer.Sound(output_path)
                         sound.play()
                         self.log(f"Simultaneous: Playing {mode} output after {latency_ms} ms")
                         # Let it finish without blocking UI
                     except Exception:
                         pygame.mixer.music.stop()
+                        # Match mixer frequency to output file to avoid artifacts on first play
+                        try:
+                            import soundfile as _sf
+                            _dat, _sr = _sf.read(output_path, dtype='float32')
+                            self._ensure_mixer(int(_sr))
+                        except Exception:
+                            pass
+                        pygame.mixer.music.unload()
                         pygame.mixer.music.load(output_path)
                         pygame.mixer.music.play()
                         self.log(f"Simultaneous: Playing {mode} output (fallback) after {latency_ms} ms")
@@ -1681,6 +2206,53 @@ class StreamSpeechComparisonApp(QMainWindow):
 
         except Exception as e:
             self.log(f"Simultaneous: Error starting playback: {e}")
+
+    def _run_streamspeech_with_watchdog(self, file_path: str, max_time_s: float = 120.0):
+        """Run Original StreamSpeech run(file_path) with a soft watchdog so it can't hang forever.
+        - Does NOT modify original code; it only toggles app.agent state if time exceeds max_time_s.
+        - Keeps Original untouched while guaranteeing the UI thread returns.
+        """
+        try:
+            import threading as _th, time as _time
+            from app import run as _run, reset as _reset
+            import app as _app
+
+            # Pre-run guard: reset and clear finished flags before launching
+            try:
+                _reset()
+            except Exception:
+                pass
+            try:
+                if hasattr(_app, 'agent') and hasattr(_app.agent, 'states'):
+                    _app.agent.states.source_finished = False
+                    _app.agent.states.target_finished = False
+            except Exception:
+                pass
+
+            def _runner():
+                try:
+                    _run(file_path)
+                except Exception as _e:
+                    print(f"[Watchdog] run() error: {_e}")
+
+            t = _th.Thread(target=_runner, daemon=True)
+            t.start()
+            start = _time.time()
+            while t.is_alive():
+                if _time.time() - start > float(max_time_s):
+                    try:
+                        # Soft stop: tell the agent we are finished
+                        _app.agent.states.source_finished = True
+                        _app.agent.states.target_finished = True
+                        print(f"[Watchdog] Forced finish after {max_time_s:.1f}s to prevent endless processing")
+                    except Exception as _e:
+                        print(f"[Watchdog] Could not force finish: {_e}")
+                    break
+                _time.sleep(0.25)
+            # Give a moment to flush S2ST states
+            _time.sleep(0.2)
+        except Exception as _err:
+            print(f"[Watchdog] Unexpected failure: {_err}")
 
     def _get_reference_text(self, fallback_text=""):
         """Return the latest English reference text from StreamSpeech (app.ST).
@@ -1975,6 +2547,8 @@ class StreamSpeechComparisonApp(QMainWindow):
         )
         
         if file_path:
+            # Ensure any previous run has stopped fully
+            self._soft_reset_processing_state()
             self.selected_file = file_path
             self.file_path_label.setText(file_path)
             self.process_original_btn.setEnabled(True)
@@ -1993,30 +2567,59 @@ class StreamSpeechComparisonApp(QMainWindow):
                 self.last_enhanced_audio = None
             except Exception:
                 pass
-            
-            # Load and display audio waveform
-            self.load_audio_waveform(file_path)
+
+            # Do NOT draw input waveforms yet; reset panels to placeholders until processing
+            try:
+                self._reset_all_waveform_placeholders()
+            except Exception:
+                pass
     
     def load_audio_waveform(self, file_path):
         """Load audio file and display waveform."""
         try:
-            # Load audio
+            # Load audio metadata only for logging; defer plotting until processing
             samples, sr = soundfile.read(file_path, dtype="float32")
-            
-            # Plot input waveform on both model panels
-            if hasattr(self, 'original_input_ax'):
-                self.plot_waveform(self.original_input_ax, samples, sr, self.colors['original_accent'])
-                if hasattr(self, 'original_input_canvas') and hasattr(self.original_input_canvas, 'draw'):
-                    self.original_input_canvas.draw()
-            if hasattr(self, 'modified_input_ax'):
-                self.plot_waveform(self.modified_input_ax, samples, sr, self.colors['modified_accent'])
-                if hasattr(self, 'modified_input_canvas') and hasattr(self.modified_input_canvas, 'draw'):
-                    self.modified_input_canvas.draw()
-            
-            self.log(f"Audio loaded: {len(samples)} samples at {sr} Hz")
+            self.last_audio_duration = float(len(samples)) / float(sr) if sr else 0.0
+            self.log(f"Audio loaded: {len(samples)} samples at {sr} Hz (waveforms will render after processing)")
             
         except Exception as e:
             self.log(f"Error loading audio: {str(e)}")
+
+    def _reset_all_waveform_placeholders(self):
+        """Reset all waveform panels to the initial placeholder text."""
+        try:
+            # Input placeholders
+            if hasattr(self, 'original_input_ax') and self.original_input_ax is not None:
+                self.original_input_ax.clear()
+                self.original_input_ax.text(0.5, 0.5, 'Waveform will appear here after processing', 
+                    ha='center', va='center', transform=self.original_input_ax.transAxes,
+                    color=self.colors['text_muted'], fontsize=12, style='italic')
+                if hasattr(self, 'original_input_canvas') and hasattr(self.original_input_canvas, 'draw'):
+                    self.original_input_canvas.draw()
+            if hasattr(self, 'modified_input_ax') and self.modified_input_ax is not None:
+                self.modified_input_ax.clear()
+                self.modified_input_ax.text(0.5, 0.5, 'Waveform will appear here after processing', 
+                    ha='center', va='center', transform=self.modified_input_ax.transAxes,
+                    color=self.colors['text_muted'], fontsize=12, style='italic')
+                if hasattr(self, 'modified_input_canvas') and hasattr(self, 'modified_input_canvas'):
+                    self.modified_input_canvas.draw()
+            # Output placeholders
+            if hasattr(self, 'original_output_ax') and self.original_output_ax is not None:
+                self.original_output_ax.clear()
+                self.original_output_ax.text(0.5, 0.5, 'Waveform will appear here after processing', 
+                    ha='center', va='center', transform=self.original_output_ax.transAxes,
+                    color=self.colors['text_muted'], fontsize=12, style='italic')
+                if hasattr(self, 'original_output_canvas') and hasattr(self.original_output_canvas, 'draw'):
+                    self.original_output_canvas.draw()
+            if hasattr(self, 'modified_output_ax') and self.modified_output_ax is not None:
+                self.modified_output_ax.clear()
+                self.modified_output_ax.text(0.5, 0.5, 'Waveform will appear here after processing', 
+                    ha='center', va='center', transform=self.modified_output_ax.transAxes,
+                    color=self.colors['text_muted'], fontsize=12, style='italic')
+                if hasattr(self, 'modified_output_canvas') and hasattr(self.modified_output_canvas, 'draw'):
+                    self.modified_output_canvas.draw()
+        except Exception:
+            pass
     
     def update_processed_waveform(self, mode, output_audio_path=None):
         """Update waveform display after processing."""
@@ -2105,7 +2708,14 @@ class StreamSpeechComparisonApp(QMainWindow):
                                     tmp_path = os.path.join(os.path.dirname(__file__), "temp_modified_output.wav")
                                     try:
                                         import soundfile as _sf
-                                        _sf.write(tmp_path, samples, _sr)
+                                        try:
+                                            _safe = self._sanitize_audio(samples, _sr)
+                                        except Exception:
+                                            _safe = samples
+                                        try:
+                                            _sf.write(tmp_path, _safe, _sr, subtype='PCM_16')
+                                        except Exception:
+                                            _sf.write(tmp_path, _safe, _sr)
                                         self.last_modified_output_path = tmp_path
                                     except Exception:
                                         pass
@@ -2180,6 +2790,39 @@ class StreamSpeechComparisonApp(QMainWindow):
         except Exception as e:
             self.log(f"Error plotting waveform: {str(e)}")
     
+    def _sanitize_audio(self, samples: np.ndarray, sr: int) -> np.ndarray:
+        """Make generated audio safe and listenable: mono, de-DC, normalized, soft-clipped, and de-buzz.
+        - Removes NaN/Inf
+        - Subtracts mean (DC offset)
+        - Pre-emphasis high-pass (simple buzz reduction)
+        - Normalizes peak to 0.9 and applies gentle tanh soft clip
+        """
+        try:
+            y = np.asarray(samples, dtype=np.float32).flatten()
+            if y.size == 0:
+                return y
+            # Remove NaN/Inf
+            y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
+            # Remove DC offset
+            y = y - float(np.mean(y))
+            # Simple high-pass via pre-emphasis to reduce low-frequency buzz
+            # y_hp[n] = y[n] - a*y[n-1]
+            a = 0.97
+            if y.size > 1:
+                y_hp = np.empty_like(y)
+                y_hp[0] = y[0]
+                y_hp[1:] = y[1:] - a * y[:-1]
+                y = y_hp
+            # Peak normalize to 0.9
+            peak = float(np.max(np.abs(y)))
+            if peak > 0:
+                y = 0.9 * (y / peak)
+            # Gentle soft clip
+            y = np.tanh(y * 1.1)
+            return y.astype(np.float32)
+        except Exception:
+            return np.asarray(samples, dtype=np.float32).flatten()
+
     def process_audio_mode(self, mode):
         """Process audio with specified mode using REAL backend."""
         if self.is_processing:
@@ -2268,13 +2911,23 @@ class StreamSpeechComparisonApp(QMainWindow):
                 print("    * GRC+LoRA: Efficient temporal modeling with adaptation")
                 print("    * FiLM: Speaker/emotion conditioning for voice cloning")
             
-            # Load and display input audio waveform
+            # Load input samples (used for plotting and metrics)
             samples, sr = soundfile.read(file_path, dtype="float32")
             audio_duration = len(samples) / sr
             print(f"Loaded audio: {len(samples)} samples at {sr} Hz")
             
-            # Load and display input waveform
-            self.load_audio_waveform(file_path)
+            # Reveal input waveform now that processing for this mode has started
+            try:
+                if mode == "Original" and hasattr(self, 'original_input_ax') and self.original_input_ax is not None:
+                    self.plot_waveform(self.original_input_ax, samples, sr, self.colors['original_accent'])
+                    if hasattr(self, 'original_input_canvas') and hasattr(self.original_input_canvas, 'draw'):
+                        self.original_input_canvas.draw()
+                if mode == "Modified" and hasattr(self, 'modified_input_ax') and self.modified_input_ax is not None:
+                    self.plot_waveform(self.modified_input_ax, samples, sr, self.colors['modified_accent'])
+                    if hasattr(self, 'modified_input_canvas') and hasattr(self.modified_input_canvas, 'draw'):
+                        self.modified_input_canvas.draw()
+            except Exception:
+                pass
             
             # Process with REAL ODConv modifications (Modified mode only)
             if mode == "Modified":
@@ -2329,10 +2982,22 @@ class StreamSpeechComparisonApp(QMainWindow):
                             output_filename = f"modified_odconv_output_{base_filename}"
                             output_path = os.path.join(output_dir, output_filename)
                             
-                            # Save enhanced audio
-                            sf.write(output_path, enhanced_audio, 22050)
-                            print(f"REAL ODConv output saved: {output_path}")
+                            # Save enhanced audio (sanitized as 16-bit PCM to avoid first-play buzzing)
+                            try:
+                                _safe = self._sanitize_audio(enhanced_audio, 22050)
+                            except Exception:
+                                _safe = enhanced_audio
+                            try:
+                                sf.write(output_path, _safe, 22050, subtype='PCM_16')
+                            except Exception:
+                                sf.write(output_path, _safe, 22050)
+                            # Ensure file is fully flushed before playback and create stabilized cache
+                            self._wait_until_audio_ready(output_path, timeout_ms=800)
                             self.last_modified_output_path = output_path
+                            try:
+                                _ = self._prepare_modified_output_cache(output_path)
+                            except Exception:
+                                pass
                             
                             # Set the output for the rest of the processing
                             import app
@@ -2347,7 +3012,10 @@ class StreamSpeechComparisonApp(QMainWindow):
                                 
                                 # Run the original StreamSpeech pipeline to get English speech output
                                 reset()
-                                run(file_path)  # This will process the original Spanish audio and produce English speech
+                                try:
+                                    self._run_streamspeech_with_watchdog(file_path, max_time_s=180.0)
+                                except Exception:
+                                    run(file_path)  # Fallback to direct call if watchdog path fails
                                 
                                 print("Full S2ST pipeline completed with ODConv enhancements!")
                                 
@@ -2386,8 +3054,10 @@ class StreamSpeechComparisonApp(QMainWindow):
                                 original_audio, sr = librosa.load(file_path, sr=22050)
                                 
                                 # Calculate real metrics using actual audio data
+                                # Use positive elapsed processing time
+                                elapsed = time.time() - processing_start
                                 real_metrics = self.modified_streamspeech.calculate_real_metrics(
-                                    original_audio, enhanced_audio, processing_start - time.time()
+                                    original_audio, enhanced_audio, elapsed
                                 )
                                 
                                 # Calculate ASR-BLEU score
@@ -2412,7 +3082,22 @@ class StreamSpeechComparisonApp(QMainWindow):
                                 print(f"ASR-BLEU Score: {asr_bleu_results.get('asr_bleu_score', 0.0):.4f}")
                                 print(f"ASR Transcription: {asr_bleu_results.get('transcribed_text', 'N/A')}")
                                 print(f"Reference Text: {asr_bleu_results.get('reference_text', 'N/A')}")
-                                print(f"Average Lagging: {real_metrics['real_time_factor']:.4f}")
+                                # Compute TRUE Average Lagging (frames + ms) from StreamSpeech logs
+                                try:
+                                    import sys as _sys, os as _os
+                                    _metrics_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
+                                    if _metrics_path not in _sys.path:
+                                        _sys.path.append(_metrics_path)
+                                    from simple_metrics_calculator import simple_metrics_calculator as _smc
+                                    import app as _app
+                                    _al_res = _smc.calculate_true_al_from_streamspeech_logs(getattr(_app, 'ASR', {}), getattr(_app, 'ST', {}))
+                                    _al_frames = _al_res.get('average_lagging')
+                                    _al_ms = _al_res.get('average_lagging_ms')
+                                    print(f"[AL] Modified TRUE AL: {(_al_frames if _al_frames is not None else 'N/A')} frames (~{(_al_ms if _al_ms is not None else 'N/A')} ms)")
+                                except Exception as _e_al:
+                                    print(f"[AL] Modified TRUE AL computation failed: {_e_al}")
+                                # Also show RTF for throughput reference (separate concept from AL)
+                                print(f"Average Lagging (RTF proxy): {real_metrics['real_time_factor']:.4f}")
                                 print(f"Real-time Factor: {real_metrics['real_time_factor']:.4f}")
                                 print(f"Processing Time: {real_metrics['processing_time']:.2f}s")
                                 print(f"Audio Duration: {real_metrics['audio_duration']:.2f}s")
@@ -2453,22 +3138,48 @@ class StreamSpeechComparisonApp(QMainWindow):
                         else:
                             print("REAL ODConv processing failed, using fallback")
                             reset()
-                            run(file_path)
+                            try:
+                                self._run_streamspeech_with_watchdog(file_path, max_time_s=180.0)
+                            except Exception:
+                                run(file_path)
                     else:
                         print("REAL ODConv not available, using fallback")
                         reset()
-                        run(file_path)
+                        try:
+                            self._run_streamspeech_with_watchdog(file_path, max_time_s=180.0)
+                        except Exception:
+                            run(file_path)
                         
                 except Exception as odconv_error:
                     print(f"ODConv processing error: {odconv_error}")
                     # Fallback to basic processing
                     reset()
-                    run(file_path)
+                    try:
+                        self._run_streamspeech_with_watchdog(file_path, max_time_s=180.0)
+                    except Exception:
+                        run(file_path)
             else:
                 # Original mode - use original StreamSpeech
                 print("Using original StreamSpeech (completely untouched)")
                 reset()
-                run(file_path)
+                try:
+                    self._run_streamspeech_with_watchdog(file_path, max_time_s=180.0)
+                except Exception:
+                    run(file_path)
+                # Compute and log TRUE Average Lagging from StreamSpeech logs (frames and ms)
+                try:
+                    import sys as _sys, os as _os
+                    _metrics_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
+                    if _metrics_path not in _sys.path:
+                        _sys.path.append(_metrics_path)
+                    from simple_metrics_calculator import simple_metrics_calculator as _smc
+                    import app as _app
+                    _al_res = _smc.calculate_true_al_from_streamspeech_logs(getattr(_app, 'ASR', {}), getattr(_app, 'ST', {}))
+                    _al_frames = _al_res.get('average_lagging')
+                    _al_ms = _al_res.get('average_lagging_ms')
+                    print(f"[AL] Original TRUE AL: {(_al_frames if _al_frames is not None else 'N/A')} frames (~{(_al_ms if _al_ms is not None else 'N/A')} ms)")
+                except Exception as _e_al:
+                    print(f"[AL] Original TRUE AL computation failed: {_e_al}")
             
             # Calculate processing time
             processing_time = time.time() - start_time
@@ -2489,11 +3200,20 @@ class StreamSpeechComparisonApp(QMainWindow):
                         self.plot_waveform(self.original_output_ax, enhanced, _sr, self.colors['original_accent'])
                         if hasattr(self, 'original_output_canvas') and hasattr(self.original_output_canvas, 'draw'):
                             self.original_output_canvas.draw()
-                        # Save to temp for playback
+                        # Sanitize and save to temp for playback
                         tmp_out = os.path.join(os.path.dirname(__file__), "temp_original_output.wav")
                         try:
                             import soundfile as _sf
-                            _sf.write(tmp_out, enhanced, _sr)
+                            safe = self._sanitize_audio(enhanced, _sr)
+                            try:
+                                _sf.write(tmp_out, safe, _sr, subtype='PCM_16')
+                            except Exception:
+                                _sf.write(tmp_out, safe, _sr)
+                            # Ensure file is flushed before marking available
+                            try:
+                                self._wait_until_audio_ready(tmp_out, timeout_ms=800)
+                            except Exception:
+                                pass
                             self.last_original_output = tmp_out
                         except Exception:
                             pass
@@ -2533,11 +3253,12 @@ class StreamSpeechComparisonApp(QMainWindow):
                     import soundfile as _sf
                     # Load input
                     inp_samples, inp_sr = soundfile.read(file_path, dtype="float32")
-                    # Determine produced output source
+                    # Determine produced output source — prefer saved modified output file
                     if getattr(self, 'last_modified_output_path', None) and os.path.exists(self.last_modified_output_path):
                         out_samples, out_sr = _sf.read(self.last_modified_output_path, dtype="float32")
+                        out_samples = self._sanitize_audio(out_samples, int(out_sr))
                     elif getattr(self, 'last_enhanced_audio', None) is not None:
-                        out_samples = self.last_enhanced_audio
+                        out_samples = self._sanitize_audio(self.last_enhanced_audio, 22050)
                         try:
                             import app as _app
                             out_sr = int(getattr(_app, 'SAMPLE_RATE', 22050))
@@ -2611,6 +3332,8 @@ class StreamSpeechComparisonApp(QMainWindow):
                     try:
                         if self.current_mode == "Modified":
                             self.last_modified_output_path = export_path
+                        else:
+                            self.last_original_output = export_path
                     except Exception:
                         pass
                 else:
@@ -2689,18 +3412,19 @@ class StreamSpeechComparisonApp(QMainWindow):
                     self.emotion_similarity_label.setText(f"Original: -- | Modified: {emotion_value:.4f}")
                 print(f"Updated Emotion Similarity: {emotion_value:.4f}")
             
-            # Update ASR-BLEU Score
+            # Update ASR-BLEU Score (display on 0–50 scale per defense guidance)
             if 'asr_bleu_score' in asr_bleu_results and hasattr(self, 'asr_bleu_label'):
-                bleu_value = asr_bleu_results['asr_bleu_score']
+                _bleu01 = float(asr_bleu_results['asr_bleu_score']) if asr_bleu_results.get('asr_bleu_score') is not None else 0.0
+                bleu_value = min(_bleu01 * 100.0, 50.0)
                 current_text = self.asr_bleu_label.text()
                 if "Original:" in current_text and "Modified:" in current_text:
                     parts = current_text.split("|")
                     if len(parts) == 2:
                         original_part = parts[0].strip()
-                        self.asr_bleu_label.setText(f"{original_part} | Modified: {bleu_value:.4f}")
+                        self.asr_bleu_label.setText(f"{original_part} | Modified: {bleu_value:.2f}")
                 else:
-                    self.asr_bleu_label.setText(f"Original: -- | Modified: {bleu_value:.4f}")
-                print(f"Updated ASR-BLEU: {bleu_value:.4f}")
+                    self.asr_bleu_label.setText(f"Original: -- | Modified: {bleu_value:.2f}")
+                print(f"Updated ASR-BLEU (0-50): {bleu_value:.2f}")
             
             # Update Average Lagging
             if 'real_time_factor' in real_metrics and hasattr(self, 'avg_lagging_label'):
@@ -2724,8 +3448,16 @@ class StreamSpeechComparisonApp(QMainWindow):
                     self.modified_processing_time.setText(f"Processing Time: {processing_time:.2f}s")
                 if hasattr(self, 'modified_real_time_factor'):
                     self.modified_real_time_factor.setText(f"Real-time Factor: {rtf:.2f}x")
-                if hasattr(self, 'modified_latency') and hasattr(self, 'latency_slider'):
-                    self.modified_latency.setText(f"Latency: {int(self.latency_slider.value())} ms")
+                # Show the Modified-side latency using its own slider if available
+                try:
+                    if hasattr(self, 'modified_latency'):
+                        if hasattr(self, 'modified_latency_slider'):
+                            _lat_ms = int(self.modified_latency_slider.value())
+                            self.modified_latency.setText(f"Latency: {_lat_ms} ms")
+                        elif hasattr(self, 'latency_slider'):
+                            self.modified_latency.setText(f"Latency: {int(self.latency_slider.value())} ms")
+                except Exception:
+                    pass
                 # Accuracy removed from performance metrics by request
             except Exception:
                 pass
@@ -2810,8 +3542,16 @@ class StreamSpeechComparisonApp(QMainWindow):
                     self.original_processing_time.setText(f"Processing Time: {processing_time:.2f}s")
                 if hasattr(self, 'original_real_time_factor'):
                     self.original_real_time_factor.setText(f"Real-time Factor: {rtf:.2f}x")
-                if hasattr(self, 'original_latency') and hasattr(self, 'latency_slider'):
-                    self.original_latency.setText(f"Latency: {int(self.latency_slider.value())} ms")
+                # Show the Original-side latency using its own slider if available
+                try:
+                    if hasattr(self, 'original_latency'):
+                        if hasattr(self, 'original_latency_slider'):
+                            _lat_ms_o = int(self.original_latency_slider.value())
+                            self.original_latency.setText(f"Latency: {_lat_ms_o} ms")
+                        elif hasattr(self, 'latency_slider'):
+                            self.original_latency.setText(f"Latency: {int(self.latency_slider.value())} ms")
+                except Exception:
+                    pass
                 # Accuracy removed from performance metrics by request
             else:
                 if hasattr(self, 'modified_processing_time'):
@@ -2821,8 +3561,9 @@ class StreamSpeechComparisonApp(QMainWindow):
                 if hasattr(self, 'modified_latency') and hasattr(self, 'latency_slider'):
                     self.modified_latency.setText(f"Latency: {int(self.latency_slider.value())} ms")
                 # Accuracy removed from performance metrics by request
-            # Update detailed metrics pair - handle None values properly
+            # Update detailed metrics pair
             side = mode
+            # Update detailed metrics pair - handle None values properly
             metrics = self.metrics_state[mode.lower()]
             
             # Speaker similarity - show both raw and mapped if available
@@ -2848,11 +3589,11 @@ class StreamSpeechComparisonApp(QMainWindow):
             else:
                 self._update_detail_pair(self.emotion_similarity_label, side, emotion_mapped)
             
-            # ASR-BLEU
+            # ASR-BLEU - Display BLEU on 0–100 scale (raw percentage)
             bleu_score = metrics.get('asr_bleu_score')
             if bleu_score is not None:
                 _bleu_full = float(bleu_score) * 100.0
-                self._update_detail_pair(self.asr_bleu_label, side, _bleu_full)
+                self._update_detail_pair(self.asr_bleu_label, side, _bleu_full, fmt="{:.2f}")
             else:
                 self._update_detail_pair(self.asr_bleu_label, side, "N/A", is_text=True)
             
