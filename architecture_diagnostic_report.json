@@ -1,0 +1,2589 @@
+{
+  "checkpoint_keys": [
+    "initial_conv.weight",
+    "initial_conv.bias",
+    "ups.0.conv.weight",
+    "ups.0.conv.bias",
+    "ups.0.speaker_proj.weight",
+    "ups.0.speaker_proj.bias",
+    "ups.0.emotion_proj.weight",
+    "ups.0.emotion_proj.bias",
+    "ups.1.conv.weight",
+    "ups.1.conv.bias",
+    "ups.1.speaker_proj.weight",
+    "ups.1.speaker_proj.bias",
+    "ups.1.emotion_proj.weight",
+    "ups.1.emotion_proj.bias",
+    "ups.2.conv.weight",
+    "ups.2.conv.bias",
+    "ups.2.speaker_proj.weight",
+    "ups.2.speaker_proj.bias",
+    "ups.2.emotion_proj.weight",
+    "ups.2.emotion_proj.bias",
+    "ups.3.conv.weight",
+    "ups.3.conv.bias",
+    "ups.3.speaker_proj.weight",
+    "ups.3.speaker_proj.bias",
+    "ups.3.emotion_proj.weight",
+    "ups.3.emotion_proj.bias",
+    "ups.4.conv.weight",
+    "ups.4.conv.bias",
+    "ups.4.speaker_proj.weight",
+    "ups.4.speaker_proj.bias",
+    "ups.4.emotion_proj.weight",
+    "ups.4.emotion_proj.bias",
+    "mrfs.0.convs.0.conv1.weight",
+    "mrfs.0.convs.0.conv1.bias",
+    "mrfs.0.convs.0.conv2.weight",
+    "mrfs.0.convs.0.conv2.bias",
+    "mrfs.0.convs.1.conv1.weight",
+    "mrfs.0.convs.1.conv1.bias",
+    "mrfs.0.convs.1.conv2.weight",
+    "mrfs.0.convs.1.conv2.bias",
+    "mrfs.0.convs.2.conv1.weight",
+    "mrfs.0.convs.2.conv1.bias",
+    "mrfs.0.convs.2.conv2.weight",
+    "mrfs.0.convs.2.conv2.bias",
+    "mrfs.1.convs.0.conv1.weight",
+    "mrfs.1.convs.0.conv1.bias",
+    "mrfs.1.convs.0.conv2.weight",
+    "mrfs.1.convs.0.conv2.bias",
+    "mrfs.1.convs.1.conv1.weight",
+    "mrfs.1.convs.1.conv1.bias",
+    "mrfs.1.convs.1.conv2.weight",
+    "mrfs.1.convs.1.conv2.bias",
+    "mrfs.1.convs.2.conv1.weight",
+    "mrfs.1.convs.2.conv1.bias",
+    "mrfs.1.convs.2.conv2.weight",
+    "mrfs.1.convs.2.conv2.bias",
+    "mrfs.2.convs.0.conv1.weight",
+    "mrfs.2.convs.0.conv1.bias",
+    "mrfs.2.convs.0.conv2.weight",
+    "mrfs.2.convs.0.conv2.bias",
+    "mrfs.2.convs.1.conv1.weight",
+    "mrfs.2.convs.1.conv1.bias",
+    "mrfs.2.convs.1.conv2.weight",
+    "mrfs.2.convs.1.conv2.bias",
+    "mrfs.2.convs.2.conv1.weight",
+    "mrfs.2.convs.2.conv1.bias",
+    "mrfs.2.convs.2.conv2.weight",
+    "mrfs.2.convs.2.conv2.bias",
+    "mrfs.3.convs.0.conv1.weight",
+    "mrfs.3.convs.0.conv1.bias",
+    "mrfs.3.convs.0.conv2.weight",
+    "mrfs.3.convs.0.conv2.bias",
+    "mrfs.3.convs.1.conv1.weight",
+    "mrfs.3.convs.1.conv1.bias",
+    "mrfs.3.convs.1.conv2.weight",
+    "mrfs.3.convs.1.conv2.bias",
+    "mrfs.3.convs.2.conv1.weight",
+    "mrfs.3.convs.2.conv1.bias",
+    "mrfs.3.convs.2.conv2.weight",
+    "mrfs.3.convs.2.conv2.bias",
+    "mrfs.4.convs.0.conv1.weight",
+    "mrfs.4.convs.0.conv1.bias",
+    "mrfs.4.convs.0.conv2.weight",
+    "mrfs.4.convs.0.conv2.bias",
+    "mrfs.4.convs.1.conv1.weight",
+    "mrfs.4.convs.1.conv1.bias",
+    "mrfs.4.convs.1.conv2.weight",
+    "mrfs.4.convs.1.conv2.bias",
+    "mrfs.4.convs.2.conv1.weight",
+    "mrfs.4.convs.2.conv1.bias",
+    "mrfs.4.convs.2.conv2.weight",
+    "mrfs.4.convs.2.conv2.bias",
+    "final_conv.weight",
+    "final_conv.bias"
+  ],
+  "model_keys": [
+    "initial_conv.weight",
+    "initial_conv.bias",
+    "ups.0.conv.weight",
+    "ups.0.conv.bias",
+    "ups.0.speaker_proj.weight",
+    "ups.0.speaker_proj.bias",
+    "ups.0.emotion_proj.weight",
+    "ups.0.emotion_proj.bias",
+    "ups.1.conv.weight",
+    "ups.1.conv.bias",
+    "ups.1.speaker_proj.weight",
+    "ups.1.speaker_proj.bias",
+    "ups.1.emotion_proj.weight",
+    "ups.1.emotion_proj.bias",
+    "ups.2.conv.weight",
+    "ups.2.conv.bias",
+    "ups.2.speaker_proj.weight",
+    "ups.2.speaker_proj.bias",
+    "ups.2.emotion_proj.weight",
+    "ups.2.emotion_proj.bias",
+    "ups.3.conv.weight",
+    "ups.3.conv.bias",
+    "ups.3.speaker_proj.weight",
+    "ups.3.speaker_proj.bias",
+    "ups.3.emotion_proj.weight",
+    "ups.3.emotion_proj.bias",
+    "ups.4.conv.weight",
+    "ups.4.conv.bias",
+    "ups.4.speaker_proj.weight",
+    "ups.4.speaker_proj.bias",
+    "ups.4.emotion_proj.weight",
+    "ups.4.emotion_proj.bias",
+    "mrfs.0.convs.0.conv1.weight",
+    "mrfs.0.convs.0.conv1.bias",
+    "mrfs.0.convs.0.conv2.weight",
+    "mrfs.0.convs.0.conv2.bias",
+    "mrfs.0.convs.0.norm1.weight",
+    "mrfs.0.convs.0.norm1.bias",
+    "mrfs.0.convs.0.norm1.running_mean",
+    "mrfs.0.convs.0.norm1.running_var",
+    "mrfs.0.convs.0.norm1.num_batches_tracked",
+    "mrfs.0.convs.0.norm2.weight",
+    "mrfs.0.convs.0.norm2.bias",
+    "mrfs.0.convs.0.norm2.running_mean",
+    "mrfs.0.convs.0.norm2.running_var",
+    "mrfs.0.convs.0.norm2.num_batches_tracked",
+    "mrfs.0.convs.0.lora_conv1.lora_A",
+    "mrfs.0.convs.0.lora_conv1.lora_B",
+    "mrfs.0.convs.0.lora_conv2.lora_A",
+    "mrfs.0.convs.0.lora_conv2.lora_B",
+    "mrfs.0.convs.0.channel_attention.1.weight",
+    "mrfs.0.convs.0.channel_attention.1.bias",
+    "mrfs.0.convs.0.channel_attention.3.weight",
+    "mrfs.0.convs.0.channel_attention.3.bias",
+    "mrfs.0.convs.0.temporal_attention.0.weight",
+    "mrfs.0.convs.0.temporal_attention.0.bias",
+    "mrfs.0.convs.1.conv1.weight",
+    "mrfs.0.convs.1.conv1.bias",
+    "mrfs.0.convs.1.conv2.weight",
+    "mrfs.0.convs.1.conv2.bias",
+    "mrfs.0.convs.1.norm1.weight",
+    "mrfs.0.convs.1.norm1.bias",
+    "mrfs.0.convs.1.norm1.running_mean",
+    "mrfs.0.convs.1.norm1.running_var",
+    "mrfs.0.convs.1.norm1.num_batches_tracked",
+    "mrfs.0.convs.1.norm2.weight",
+    "mrfs.0.convs.1.norm2.bias",
+    "mrfs.0.convs.1.norm2.running_mean",
+    "mrfs.0.convs.1.norm2.running_var",
+    "mrfs.0.convs.1.norm2.num_batches_tracked",
+    "mrfs.0.convs.1.lora_conv1.lora_A",
+    "mrfs.0.convs.1.lora_conv1.lora_B",
+    "mrfs.0.convs.1.lora_conv2.lora_A",
+    "mrfs.0.convs.1.lora_conv2.lora_B",
+    "mrfs.0.convs.1.channel_attention.1.weight",
+    "mrfs.0.convs.1.channel_attention.1.bias",
+    "mrfs.0.convs.1.channel_attention.3.weight",
+    "mrfs.0.convs.1.channel_attention.3.bias",
+    "mrfs.0.convs.1.temporal_attention.0.weight",
+    "mrfs.0.convs.1.temporal_attention.0.bias",
+    "mrfs.0.convs.2.conv1.weight",
+    "mrfs.0.convs.2.conv1.bias",
+    "mrfs.0.convs.2.conv2.weight",
+    "mrfs.0.convs.2.conv2.bias",
+    "mrfs.0.convs.2.norm1.weight",
+    "mrfs.0.convs.2.norm1.bias",
+    "mrfs.0.convs.2.norm1.running_mean",
+    "mrfs.0.convs.2.norm1.running_var",
+    "mrfs.0.convs.2.norm1.num_batches_tracked",
+    "mrfs.0.convs.2.norm2.weight",
+    "mrfs.0.convs.2.norm2.bias",
+    "mrfs.0.convs.2.norm2.running_mean",
+    "mrfs.0.convs.2.norm2.running_var",
+    "mrfs.0.convs.2.norm2.num_batches_tracked",
+    "mrfs.0.convs.2.lora_conv1.lora_A",
+    "mrfs.0.convs.2.lora_conv1.lora_B",
+    "mrfs.0.convs.2.lora_conv2.lora_A",
+    "mrfs.0.convs.2.lora_conv2.lora_B",
+    "mrfs.0.convs.2.channel_attention.1.weight",
+    "mrfs.0.convs.2.channel_attention.1.bias",
+    "mrfs.0.convs.2.channel_attention.3.weight",
+    "mrfs.0.convs.2.channel_attention.3.bias",
+    "mrfs.0.convs.2.temporal_attention.0.weight",
+    "mrfs.0.convs.2.temporal_attention.0.bias",
+    "mrfs.1.convs.0.conv1.weight",
+    "mrfs.1.convs.0.conv1.bias",
+    "mrfs.1.convs.0.conv2.weight",
+    "mrfs.1.convs.0.conv2.bias",
+    "mrfs.1.convs.0.norm1.weight",
+    "mrfs.1.convs.0.norm1.bias",
+    "mrfs.1.convs.0.norm1.running_mean",
+    "mrfs.1.convs.0.norm1.running_var",
+    "mrfs.1.convs.0.norm1.num_batches_tracked",
+    "mrfs.1.convs.0.norm2.weight",
+    "mrfs.1.convs.0.norm2.bias",
+    "mrfs.1.convs.0.norm2.running_mean",
+    "mrfs.1.convs.0.norm2.running_var",
+    "mrfs.1.convs.0.norm2.num_batches_tracked",
+    "mrfs.1.convs.0.lora_conv1.lora_A",
+    "mrfs.1.convs.0.lora_conv1.lora_B",
+    "mrfs.1.convs.0.lora_conv2.lora_A",
+    "mrfs.1.convs.0.lora_conv2.lora_B",
+    "mrfs.1.convs.0.channel_attention.1.weight",
+    "mrfs.1.convs.0.channel_attention.1.bias",
+    "mrfs.1.convs.0.channel_attention.3.weight",
+    "mrfs.1.convs.0.channel_attention.3.bias",
+    "mrfs.1.convs.0.temporal_attention.0.weight",
+    "mrfs.1.convs.0.temporal_attention.0.bias",
+    "mrfs.1.convs.1.conv1.weight",
+    "mrfs.1.convs.1.conv1.bias",
+    "mrfs.1.convs.1.conv2.weight",
+    "mrfs.1.convs.1.conv2.bias",
+    "mrfs.1.convs.1.norm1.weight",
+    "mrfs.1.convs.1.norm1.bias",
+    "mrfs.1.convs.1.norm1.running_mean",
+    "mrfs.1.convs.1.norm1.running_var",
+    "mrfs.1.convs.1.norm1.num_batches_tracked",
+    "mrfs.1.convs.1.norm2.weight",
+    "mrfs.1.convs.1.norm2.bias",
+    "mrfs.1.convs.1.norm2.running_mean",
+    "mrfs.1.convs.1.norm2.running_var",
+    "mrfs.1.convs.1.norm2.num_batches_tracked",
+    "mrfs.1.convs.1.lora_conv1.lora_A",
+    "mrfs.1.convs.1.lora_conv1.lora_B",
+    "mrfs.1.convs.1.lora_conv2.lora_A",
+    "mrfs.1.convs.1.lora_conv2.lora_B",
+    "mrfs.1.convs.1.channel_attention.1.weight",
+    "mrfs.1.convs.1.channel_attention.1.bias",
+    "mrfs.1.convs.1.channel_attention.3.weight",
+    "mrfs.1.convs.1.channel_attention.3.bias",
+    "mrfs.1.convs.1.temporal_attention.0.weight",
+    "mrfs.1.convs.1.temporal_attention.0.bias",
+    "mrfs.1.convs.2.conv1.weight",
+    "mrfs.1.convs.2.conv1.bias",
+    "mrfs.1.convs.2.conv2.weight",
+    "mrfs.1.convs.2.conv2.bias",
+    "mrfs.1.convs.2.norm1.weight",
+    "mrfs.1.convs.2.norm1.bias",
+    "mrfs.1.convs.2.norm1.running_mean",
+    "mrfs.1.convs.2.norm1.running_var",
+    "mrfs.1.convs.2.norm1.num_batches_tracked",
+    "mrfs.1.convs.2.norm2.weight",
+    "mrfs.1.convs.2.norm2.bias",
+    "mrfs.1.convs.2.norm2.running_mean",
+    "mrfs.1.convs.2.norm2.running_var",
+    "mrfs.1.convs.2.norm2.num_batches_tracked",
+    "mrfs.1.convs.2.lora_conv1.lora_A",
+    "mrfs.1.convs.2.lora_conv1.lora_B",
+    "mrfs.1.convs.2.lora_conv2.lora_A",
+    "mrfs.1.convs.2.lora_conv2.lora_B",
+    "mrfs.1.convs.2.channel_attention.1.weight",
+    "mrfs.1.convs.2.channel_attention.1.bias",
+    "mrfs.1.convs.2.channel_attention.3.weight",
+    "mrfs.1.convs.2.channel_attention.3.bias",
+    "mrfs.1.convs.2.temporal_attention.0.weight",
+    "mrfs.1.convs.2.temporal_attention.0.bias",
+    "mrfs.2.convs.0.conv1.weight",
+    "mrfs.2.convs.0.conv1.bias",
+    "mrfs.2.convs.0.conv2.weight",
+    "mrfs.2.convs.0.conv2.bias",
+    "mrfs.2.convs.0.norm1.weight",
+    "mrfs.2.convs.0.norm1.bias",
+    "mrfs.2.convs.0.norm1.running_mean",
+    "mrfs.2.convs.0.norm1.running_var",
+    "mrfs.2.convs.0.norm1.num_batches_tracked",
+    "mrfs.2.convs.0.norm2.weight",
+    "mrfs.2.convs.0.norm2.bias",
+    "mrfs.2.convs.0.norm2.running_mean",
+    "mrfs.2.convs.0.norm2.running_var",
+    "mrfs.2.convs.0.norm2.num_batches_tracked",
+    "mrfs.2.convs.0.lora_conv1.lora_A",
+    "mrfs.2.convs.0.lora_conv1.lora_B",
+    "mrfs.2.convs.0.lora_conv2.lora_A",
+    "mrfs.2.convs.0.lora_conv2.lora_B",
+    "mrfs.2.convs.0.channel_attention.1.weight",
+    "mrfs.2.convs.0.channel_attention.1.bias",
+    "mrfs.2.convs.0.channel_attention.3.weight",
+    "mrfs.2.convs.0.channel_attention.3.bias",
+    "mrfs.2.convs.0.temporal_attention.0.weight",
+    "mrfs.2.convs.0.temporal_attention.0.bias",
+    "mrfs.2.convs.1.conv1.weight",
+    "mrfs.2.convs.1.conv1.bias",
+    "mrfs.2.convs.1.conv2.weight",
+    "mrfs.2.convs.1.conv2.bias",
+    "mrfs.2.convs.1.norm1.weight",
+    "mrfs.2.convs.1.norm1.bias",
+    "mrfs.2.convs.1.norm1.running_mean",
+    "mrfs.2.convs.1.norm1.running_var",
+    "mrfs.2.convs.1.norm1.num_batches_tracked",
+    "mrfs.2.convs.1.norm2.weight",
+    "mrfs.2.convs.1.norm2.bias",
+    "mrfs.2.convs.1.norm2.running_mean",
+    "mrfs.2.convs.1.norm2.running_var",
+    "mrfs.2.convs.1.norm2.num_batches_tracked",
+    "mrfs.2.convs.1.lora_conv1.lora_A",
+    "mrfs.2.convs.1.lora_conv1.lora_B",
+    "mrfs.2.convs.1.lora_conv2.lora_A",
+    "mrfs.2.convs.1.lora_conv2.lora_B",
+    "mrfs.2.convs.1.channel_attention.1.weight",
+    "mrfs.2.convs.1.channel_attention.1.bias",
+    "mrfs.2.convs.1.channel_attention.3.weight",
+    "mrfs.2.convs.1.channel_attention.3.bias",
+    "mrfs.2.convs.1.temporal_attention.0.weight",
+    "mrfs.2.convs.1.temporal_attention.0.bias",
+    "mrfs.2.convs.2.conv1.weight",
+    "mrfs.2.convs.2.conv1.bias",
+    "mrfs.2.convs.2.conv2.weight",
+    "mrfs.2.convs.2.conv2.bias",
+    "mrfs.2.convs.2.norm1.weight",
+    "mrfs.2.convs.2.norm1.bias",
+    "mrfs.2.convs.2.norm1.running_mean",
+    "mrfs.2.convs.2.norm1.running_var",
+    "mrfs.2.convs.2.norm1.num_batches_tracked",
+    "mrfs.2.convs.2.norm2.weight",
+    "mrfs.2.convs.2.norm2.bias",
+    "mrfs.2.convs.2.norm2.running_mean",
+    "mrfs.2.convs.2.norm2.running_var",
+    "mrfs.2.convs.2.norm2.num_batches_tracked",
+    "mrfs.2.convs.2.lora_conv1.lora_A",
+    "mrfs.2.convs.2.lora_conv1.lora_B",
+    "mrfs.2.convs.2.lora_conv2.lora_A",
+    "mrfs.2.convs.2.lora_conv2.lora_B",
+    "mrfs.2.convs.2.channel_attention.1.weight",
+    "mrfs.2.convs.2.channel_attention.1.bias",
+    "mrfs.2.convs.2.channel_attention.3.weight",
+    "mrfs.2.convs.2.channel_attention.3.bias",
+    "mrfs.2.convs.2.temporal_attention.0.weight",
+    "mrfs.2.convs.2.temporal_attention.0.bias",
+    "mrfs.3.convs.0.conv1.weight",
+    "mrfs.3.convs.0.conv1.bias",
+    "mrfs.3.convs.0.conv2.weight",
+    "mrfs.3.convs.0.conv2.bias",
+    "mrfs.3.convs.0.norm1.weight",
+    "mrfs.3.convs.0.norm1.bias",
+    "mrfs.3.convs.0.norm1.running_mean",
+    "mrfs.3.convs.0.norm1.running_var",
+    "mrfs.3.convs.0.norm1.num_batches_tracked",
+    "mrfs.3.convs.0.norm2.weight",
+    "mrfs.3.convs.0.norm2.bias",
+    "mrfs.3.convs.0.norm2.running_mean",
+    "mrfs.3.convs.0.norm2.running_var",
+    "mrfs.3.convs.0.norm2.num_batches_tracked",
+    "mrfs.3.convs.0.lora_conv1.lora_A",
+    "mrfs.3.convs.0.lora_conv1.lora_B",
+    "mrfs.3.convs.0.lora_conv2.lora_A",
+    "mrfs.3.convs.0.lora_conv2.lora_B",
+    "mrfs.3.convs.0.channel_attention.1.weight",
+    "mrfs.3.convs.0.channel_attention.1.bias",
+    "mrfs.3.convs.0.channel_attention.3.weight",
+    "mrfs.3.convs.0.channel_attention.3.bias",
+    "mrfs.3.convs.0.temporal_attention.0.weight",
+    "mrfs.3.convs.0.temporal_attention.0.bias",
+    "mrfs.3.convs.1.conv1.weight",
+    "mrfs.3.convs.1.conv1.bias",
+    "mrfs.3.convs.1.conv2.weight",
+    "mrfs.3.convs.1.conv2.bias",
+    "mrfs.3.convs.1.norm1.weight",
+    "mrfs.3.convs.1.norm1.bias",
+    "mrfs.3.convs.1.norm1.running_mean",
+    "mrfs.3.convs.1.norm1.running_var",
+    "mrfs.3.convs.1.norm1.num_batches_tracked",
+    "mrfs.3.convs.1.norm2.weight",
+    "mrfs.3.convs.1.norm2.bias",
+    "mrfs.3.convs.1.norm2.running_mean",
+    "mrfs.3.convs.1.norm2.running_var",
+    "mrfs.3.convs.1.norm2.num_batches_tracked",
+    "mrfs.3.convs.1.lora_conv1.lora_A",
+    "mrfs.3.convs.1.lora_conv1.lora_B",
+    "mrfs.3.convs.1.lora_conv2.lora_A",
+    "mrfs.3.convs.1.lora_conv2.lora_B",
+    "mrfs.3.convs.1.channel_attention.1.weight",
+    "mrfs.3.convs.1.channel_attention.1.bias",
+    "mrfs.3.convs.1.channel_attention.3.weight",
+    "mrfs.3.convs.1.channel_attention.3.bias",
+    "mrfs.3.convs.1.temporal_attention.0.weight",
+    "mrfs.3.convs.1.temporal_attention.0.bias",
+    "mrfs.3.convs.2.conv1.weight",
+    "mrfs.3.convs.2.conv1.bias",
+    "mrfs.3.convs.2.conv2.weight",
+    "mrfs.3.convs.2.conv2.bias",
+    "mrfs.3.convs.2.norm1.weight",
+    "mrfs.3.convs.2.norm1.bias",
+    "mrfs.3.convs.2.norm1.running_mean",
+    "mrfs.3.convs.2.norm1.running_var",
+    "mrfs.3.convs.2.norm1.num_batches_tracked",
+    "mrfs.3.convs.2.norm2.weight",
+    "mrfs.3.convs.2.norm2.bias",
+    "mrfs.3.convs.2.norm2.running_mean",
+    "mrfs.3.convs.2.norm2.running_var",
+    "mrfs.3.convs.2.norm2.num_batches_tracked",
+    "mrfs.3.convs.2.lora_conv1.lora_A",
+    "mrfs.3.convs.2.lora_conv1.lora_B",
+    "mrfs.3.convs.2.lora_conv2.lora_A",
+    "mrfs.3.convs.2.lora_conv2.lora_B",
+    "mrfs.3.convs.2.channel_attention.1.weight",
+    "mrfs.3.convs.2.channel_attention.1.bias",
+    "mrfs.3.convs.2.channel_attention.3.weight",
+    "mrfs.3.convs.2.channel_attention.3.bias",
+    "mrfs.3.convs.2.temporal_attention.0.weight",
+    "mrfs.3.convs.2.temporal_attention.0.bias",
+    "mrfs.4.convs.0.conv1.weight",
+    "mrfs.4.convs.0.conv1.bias",
+    "mrfs.4.convs.0.conv2.weight",
+    "mrfs.4.convs.0.conv2.bias",
+    "mrfs.4.convs.0.norm1.weight",
+    "mrfs.4.convs.0.norm1.bias",
+    "mrfs.4.convs.0.norm1.running_mean",
+    "mrfs.4.convs.0.norm1.running_var",
+    "mrfs.4.convs.0.norm1.num_batches_tracked",
+    "mrfs.4.convs.0.norm2.weight",
+    "mrfs.4.convs.0.norm2.bias",
+    "mrfs.4.convs.0.norm2.running_mean",
+    "mrfs.4.convs.0.norm2.running_var",
+    "mrfs.4.convs.0.norm2.num_batches_tracked",
+    "mrfs.4.convs.0.lora_conv1.lora_A",
+    "mrfs.4.convs.0.lora_conv1.lora_B",
+    "mrfs.4.convs.0.lora_conv2.lora_A",
+    "mrfs.4.convs.0.lora_conv2.lora_B",
+    "mrfs.4.convs.0.channel_attention.1.weight",
+    "mrfs.4.convs.0.channel_attention.1.bias",
+    "mrfs.4.convs.0.channel_attention.3.weight",
+    "mrfs.4.convs.0.channel_attention.3.bias",
+    "mrfs.4.convs.0.temporal_attention.0.weight",
+    "mrfs.4.convs.0.temporal_attention.0.bias",
+    "mrfs.4.convs.1.conv1.weight",
+    "mrfs.4.convs.1.conv1.bias",
+    "mrfs.4.convs.1.conv2.weight",
+    "mrfs.4.convs.1.conv2.bias",
+    "mrfs.4.convs.1.norm1.weight",
+    "mrfs.4.convs.1.norm1.bias",
+    "mrfs.4.convs.1.norm1.running_mean",
+    "mrfs.4.convs.1.norm1.running_var",
+    "mrfs.4.convs.1.norm1.num_batches_tracked",
+    "mrfs.4.convs.1.norm2.weight",
+    "mrfs.4.convs.1.norm2.bias",
+    "mrfs.4.convs.1.norm2.running_mean",
+    "mrfs.4.convs.1.norm2.running_var",
+    "mrfs.4.convs.1.norm2.num_batches_tracked",
+    "mrfs.4.convs.1.lora_conv1.lora_A",
+    "mrfs.4.convs.1.lora_conv1.lora_B",
+    "mrfs.4.convs.1.lora_conv2.lora_A",
+    "mrfs.4.convs.1.lora_conv2.lora_B",
+    "mrfs.4.convs.1.channel_attention.1.weight",
+    "mrfs.4.convs.1.channel_attention.1.bias",
+    "mrfs.4.convs.1.channel_attention.3.weight",
+    "mrfs.4.convs.1.channel_attention.3.bias",
+    "mrfs.4.convs.1.temporal_attention.0.weight",
+    "mrfs.4.convs.1.temporal_attention.0.bias",
+    "mrfs.4.convs.2.conv1.weight",
+    "mrfs.4.convs.2.conv1.bias",
+    "mrfs.4.convs.2.conv2.weight",
+    "mrfs.4.convs.2.conv2.bias",
+    "mrfs.4.convs.2.norm1.weight",
+    "mrfs.4.convs.2.norm1.bias",
+    "mrfs.4.convs.2.norm1.running_mean",
+    "mrfs.4.convs.2.norm1.running_var",
+    "mrfs.4.convs.2.norm1.num_batches_tracked",
+    "mrfs.4.convs.2.norm2.weight",
+    "mrfs.4.convs.2.norm2.bias",
+    "mrfs.4.convs.2.norm2.running_mean",
+    "mrfs.4.convs.2.norm2.running_var",
+    "mrfs.4.convs.2.norm2.num_batches_tracked",
+    "mrfs.4.convs.2.lora_conv1.lora_A",
+    "mrfs.4.convs.2.lora_conv1.lora_B",
+    "mrfs.4.convs.2.lora_conv2.lora_A",
+    "mrfs.4.convs.2.lora_conv2.lora_B",
+    "mrfs.4.convs.2.channel_attention.1.weight",
+    "mrfs.4.convs.2.channel_attention.1.bias",
+    "mrfs.4.convs.2.channel_attention.3.weight",
+    "mrfs.4.convs.2.channel_attention.3.bias",
+    "mrfs.4.convs.2.temporal_attention.0.weight",
+    "mrfs.4.convs.2.temporal_attention.0.bias",
+    "final_conv.weight",
+    "final_conv.bias"
+  ],
+  "mismatched_keys": {
+    "missing_in_model": [],
+    "missing_in_checkpoint": [
+      "mrfs.4.convs.2.temporal_attention.0.weight",
+      "mrfs.2.convs.0.lora_conv1.lora_A",
+      "mrfs.3.convs.0.temporal_attention.0.bias",
+      "mrfs.3.convs.0.norm1.bias",
+      "mrfs.4.convs.0.lora_conv2.lora_B",
+      "mrfs.4.convs.0.channel_attention.3.bias",
+      "mrfs.3.convs.2.channel_attention.3.weight",
+      "mrfs.0.convs.2.norm1.num_batches_tracked",
+      "mrfs.3.convs.1.norm2.bias",
+      "mrfs.4.convs.1.channel_attention.3.weight",
+      "mrfs.2.convs.0.lora_conv1.lora_B",
+      "mrfs.4.convs.0.norm1.running_var",
+      "mrfs.2.convs.2.channel_attention.3.bias",
+      "mrfs.2.convs.2.norm2.weight",
+      "mrfs.3.convs.2.norm1.num_batches_tracked",
+      "mrfs.2.convs.0.norm2.bias",
+      "mrfs.3.convs.1.lora_conv2.lora_B",
+      "mrfs.0.convs.1.norm2.running_mean",
+      "mrfs.1.convs.0.lora_conv1.lora_B",
+      "mrfs.0.convs.1.norm1.num_batches_tracked",
+      "mrfs.0.convs.2.lora_conv1.lora_B",
+      "mrfs.4.convs.0.norm1.bias",
+      "mrfs.3.convs.0.norm1.running_var",
+      "mrfs.1.convs.0.norm2.running_var",
+      "mrfs.2.convs.1.channel_attention.3.bias",
+      "mrfs.1.convs.2.temporal_attention.0.weight",
+      "mrfs.3.convs.1.temporal_attention.0.bias",
+      "mrfs.4.convs.2.channel_attention.1.bias",
+      "mrfs.2.convs.2.norm2.bias",
+      "mrfs.2.convs.1.norm2.num_batches_tracked",
+      "mrfs.0.convs.1.channel_attention.3.weight",
+      "mrfs.3.convs.2.norm2.running_mean",
+      "mrfs.2.convs.1.temporal_attention.0.weight",
+      "mrfs.0.convs.2.norm1.running_mean",
+      "mrfs.1.convs.2.norm2.bias",
+      "mrfs.2.convs.1.lora_conv1.lora_B",
+      "mrfs.4.convs.0.temporal_attention.0.bias",
+      "mrfs.0.convs.0.channel_attention.1.bias",
+      "mrfs.0.convs.1.lora_conv1.lora_A",
+      "mrfs.0.convs.1.channel_attention.1.weight",
+      "mrfs.2.convs.1.norm2.running_var",
+      "mrfs.1.convs.0.lora_conv1.lora_A",
+      "mrfs.1.convs.0.lora_conv2.lora_A",
+      "mrfs.3.convs.1.norm2.num_batches_tracked",
+      "mrfs.0.convs.1.norm2.num_batches_tracked",
+      "mrfs.3.convs.0.channel_attention.1.weight",
+      "mrfs.0.convs.2.channel_attention.1.weight",
+      "mrfs.4.convs.2.lora_conv2.lora_A",
+      "mrfs.4.convs.2.lora_conv2.lora_B",
+      "mrfs.0.convs.2.norm1.bias",
+      "mrfs.0.convs.1.norm1.running_mean",
+      "mrfs.1.convs.2.norm2.num_batches_tracked",
+      "mrfs.1.convs.2.lora_conv1.lora_A",
+      "mrfs.4.convs.1.lora_conv1.lora_B",
+      "mrfs.1.convs.1.norm1.running_var",
+      "mrfs.3.convs.0.channel_attention.3.weight",
+      "mrfs.3.convs.1.channel_attention.3.bias",
+      "mrfs.4.convs.1.norm1.bias",
+      "mrfs.2.convs.2.norm2.running_mean",
+      "mrfs.4.convs.1.temporal_attention.0.weight",
+      "mrfs.2.convs.1.lora_conv2.lora_A",
+      "mrfs.3.convs.0.lora_conv2.lora_A",
+      "mrfs.4.convs.2.norm1.weight",
+      "mrfs.2.convs.1.norm1.num_batches_tracked",
+      "mrfs.3.convs.0.norm2.weight",
+      "mrfs.0.convs.2.temporal_attention.0.weight",
+      "mrfs.3.convs.0.channel_attention.1.bias",
+      "mrfs.0.convs.1.norm1.weight",
+      "mrfs.2.convs.2.temporal_attention.0.weight",
+      "mrfs.4.convs.0.channel_attention.3.weight",
+      "mrfs.3.convs.1.channel_attention.3.weight",
+      "mrfs.0.convs.0.norm1.weight",
+      "mrfs.1.convs.1.norm1.num_batches_tracked",
+      "mrfs.2.convs.2.temporal_attention.0.bias",
+      "mrfs.4.convs.2.lora_conv1.lora_B",
+      "mrfs.4.convs.2.norm1.bias",
+      "mrfs.4.convs.0.norm2.num_batches_tracked",
+      "mrfs.2.convs.0.temporal_attention.0.weight",
+      "mrfs.2.convs.1.temporal_attention.0.bias",
+      "mrfs.2.convs.0.lora_conv2.lora_A",
+      "mrfs.0.convs.0.lora_conv1.lora_B",
+      "mrfs.3.convs.0.channel_attention.3.bias",
+      "mrfs.1.convs.2.norm1.num_batches_tracked",
+      "mrfs.2.convs.1.channel_attention.1.weight",
+      "mrfs.3.convs.2.norm1.running_var",
+      "mrfs.0.convs.2.norm2.weight",
+      "mrfs.1.convs.1.lora_conv2.lora_A",
+      "mrfs.2.convs.1.norm1.bias",
+      "mrfs.3.convs.0.lora_conv1.lora_A",
+      "mrfs.2.convs.1.norm2.bias",
+      "mrfs.0.convs.2.norm2.bias",
+      "mrfs.0.convs.1.channel_attention.3.bias",
+      "mrfs.2.convs.2.norm1.running_var",
+      "mrfs.4.convs.2.lora_conv1.lora_A",
+      "mrfs.1.convs.0.norm2.bias",
+      "mrfs.0.convs.1.lora_conv2.lora_A",
+      "mrfs.3.convs.1.lora_conv1.lora_A",
+      "mrfs.1.convs.1.temporal_attention.0.bias",
+      "mrfs.4.convs.1.lora_conv2.lora_A",
+      "mrfs.1.convs.0.norm2.num_batches_tracked",
+      "mrfs.3.convs.0.norm2.running_mean",
+      "mrfs.3.convs.2.norm1.running_mean",
+      "mrfs.4.convs.1.channel_attention.1.weight",
+      "mrfs.4.convs.1.channel_attention.1.bias",
+      "mrfs.1.convs.2.channel_attention.3.weight",
+      "mrfs.1.convs.1.lora_conv2.lora_B",
+      "mrfs.4.convs.0.norm1.num_batches_tracked",
+      "mrfs.0.convs.1.norm2.running_var",
+      "mrfs.0.convs.2.channel_attention.1.bias",
+      "mrfs.4.convs.0.norm2.weight",
+      "mrfs.1.convs.1.norm1.bias",
+      "mrfs.4.convs.2.norm1.num_batches_tracked",
+      "mrfs.2.convs.0.temporal_attention.0.bias",
+      "mrfs.0.convs.0.norm1.num_batches_tracked",
+      "mrfs.3.convs.1.norm1.bias",
+      "mrfs.1.convs.2.norm1.bias",
+      "mrfs.4.convs.0.norm2.bias",
+      "mrfs.3.convs.2.temporal_attention.0.weight",
+      "mrfs.4.convs.2.norm2.weight",
+      "mrfs.2.convs.2.norm1.bias",
+      "mrfs.4.convs.0.norm1.running_mean",
+      "mrfs.3.convs.2.norm2.bias",
+      "mrfs.0.convs.2.norm2.running_mean",
+      "mrfs.4.convs.2.norm1.running_mean",
+      "mrfs.0.convs.0.norm2.num_batches_tracked",
+      "mrfs.2.convs.0.norm1.weight",
+      "mrfs.1.convs.0.temporal_attention.0.weight",
+      "mrfs.2.convs.2.lora_conv1.lora_B",
+      "mrfs.1.convs.1.lora_conv1.lora_B",
+      "mrfs.1.convs.0.norm1.running_var",
+      "mrfs.3.convs.0.norm2.bias",
+      "mrfs.1.convs.1.temporal_attention.0.weight",
+      "mrfs.4.convs.2.norm2.num_batches_tracked",
+      "mrfs.4.convs.0.channel_attention.1.bias",
+      "mrfs.1.convs.1.channel_attention.1.weight",
+      "mrfs.2.convs.0.norm2.weight",
+      "mrfs.2.convs.0.norm1.bias",
+      "mrfs.4.convs.1.norm2.bias",
+      "mrfs.3.convs.2.norm2.weight",
+      "mrfs.4.convs.2.norm1.running_var",
+      "mrfs.2.convs.0.norm2.running_var",
+      "mrfs.4.convs.2.norm2.running_mean",
+      "mrfs.0.convs.1.norm2.weight",
+      "mrfs.1.convs.0.norm2.running_mean",
+      "mrfs.0.convs.1.norm1.bias",
+      "mrfs.3.convs.1.channel_attention.1.bias",
+      "mrfs.0.convs.1.temporal_attention.0.bias",
+      "mrfs.0.convs.1.norm2.bias",
+      "mrfs.1.convs.0.norm1.running_mean",
+      "mrfs.1.convs.2.norm2.running_var",
+      "mrfs.4.convs.1.channel_attention.3.bias",
+      "mrfs.1.convs.2.channel_attention.1.bias",
+      "mrfs.0.convs.2.lora_conv2.lora_B",
+      "mrfs.2.convs.2.lora_conv2.lora_B",
+      "mrfs.3.convs.0.temporal_attention.0.weight",
+      "mrfs.0.convs.2.norm2.running_var",
+      "mrfs.1.convs.1.channel_attention.3.bias",
+      "mrfs.4.convs.0.lora_conv1.lora_A",
+      "mrfs.1.convs.0.temporal_attention.0.bias",
+      "mrfs.0.convs.1.norm1.running_var",
+      "mrfs.0.convs.0.norm1.bias",
+      "mrfs.3.convs.2.lora_conv2.lora_A",
+      "mrfs.4.convs.1.lora_conv1.lora_A",
+      "mrfs.0.convs.0.channel_attention.1.weight",
+      "mrfs.2.convs.2.norm1.weight",
+      "mrfs.3.convs.1.temporal_attention.0.weight",
+      "mrfs.2.convs.0.norm2.running_mean",
+      "mrfs.2.convs.2.norm2.num_batches_tracked",
+      "mrfs.4.convs.0.channel_attention.1.weight",
+      "mrfs.1.convs.0.norm1.num_batches_tracked",
+      "mrfs.3.convs.1.norm1.weight",
+      "mrfs.2.convs.0.lora_conv2.lora_B",
+      "mrfs.0.convs.2.temporal_attention.0.bias",
+      "mrfs.0.convs.1.channel_attention.1.bias",
+      "mrfs.3.convs.1.norm2.running_mean",
+      "mrfs.3.convs.0.norm1.num_batches_tracked",
+      "mrfs.0.convs.1.lora_conv2.lora_B",
+      "mrfs.0.convs.1.lora_conv1.lora_B",
+      "mrfs.1.convs.1.lora_conv1.lora_A",
+      "mrfs.3.convs.2.lora_conv1.lora_A",
+      "mrfs.2.convs.0.norm1.num_batches_tracked",
+      "mrfs.1.convs.1.norm2.bias",
+      "mrfs.2.convs.0.channel_attention.1.bias",
+      "mrfs.1.convs.1.norm2.running_mean",
+      "mrfs.3.convs.2.norm2.running_var",
+      "mrfs.2.convs.2.lora_conv2.lora_A",
+      "mrfs.2.convs.2.channel_attention.1.bias",
+      "mrfs.3.convs.0.norm2.num_batches_tracked",
+      "mrfs.3.convs.2.lora_conv2.lora_B",
+      "mrfs.4.convs.0.norm2.running_mean",
+      "mrfs.3.convs.1.norm1.running_mean",
+      "mrfs.4.convs.1.norm1.running_var",
+      "mrfs.1.convs.1.norm2.weight",
+      "mrfs.2.convs.0.channel_attention.3.bias",
+      "mrfs.0.convs.0.lora_conv1.lora_A",
+      "mrfs.0.convs.0.norm2.running_var",
+      "mrfs.2.convs.2.channel_attention.1.weight",
+      "mrfs.0.convs.0.norm2.bias",
+      "mrfs.4.convs.1.norm2.running_var",
+      "mrfs.4.convs.0.lora_conv2.lora_A",
+      "mrfs.2.convs.2.norm1.running_mean",
+      "mrfs.2.convs.0.channel_attention.1.weight",
+      "mrfs.4.convs.2.norm2.running_var",
+      "mrfs.3.convs.1.lora_conv2.lora_A",
+      "mrfs.2.convs.0.norm2.num_batches_tracked",
+      "mrfs.3.convs.2.channel_attention.3.bias",
+      "mrfs.1.convs.0.lora_conv2.lora_B",
+      "mrfs.1.convs.0.norm1.bias",
+      "mrfs.1.convs.2.norm1.running_mean",
+      "mrfs.0.convs.0.channel_attention.3.weight",
+      "mrfs.2.convs.1.norm2.weight",
+      "mrfs.1.convs.2.lora_conv2.lora_B",
+      "mrfs.1.convs.1.channel_attention.3.weight",
+      "mrfs.2.convs.1.channel_attention.1.bias",
+      "mrfs.3.convs.1.channel_attention.1.weight",
+      "mrfs.1.convs.0.channel_attention.1.bias",
+      "mrfs.2.convs.0.channel_attention.3.weight",
+      "mrfs.1.convs.0.channel_attention.3.weight",
+      "mrfs.3.convs.1.norm2.weight",
+      "mrfs.2.convs.0.norm1.running_mean",
+      "mrfs.0.convs.2.lora_conv2.lora_A",
+      "mrfs.0.convs.0.norm1.running_mean",
+      "mrfs.0.convs.2.channel_attention.3.bias",
+      "mrfs.4.convs.1.norm2.weight",
+      "mrfs.4.convs.0.temporal_attention.0.weight",
+      "mrfs.1.convs.2.norm1.running_var",
+      "mrfs.4.convs.1.temporal_attention.0.bias",
+      "mrfs.3.convs.1.norm1.num_batches_tracked",
+      "mrfs.4.convs.1.norm1.weight",
+      "mrfs.4.convs.0.norm1.weight",
+      "mrfs.0.convs.0.norm1.running_var",
+      "mrfs.1.convs.1.norm1.running_mean",
+      "mrfs.4.convs.1.lora_conv2.lora_B",
+      "mrfs.1.convs.2.norm1.weight",
+      "mrfs.1.convs.1.channel_attention.1.bias",
+      "mrfs.1.convs.2.norm2.weight",
+      "mrfs.0.convs.0.channel_attention.3.bias",
+      "mrfs.4.convs.2.channel_attention.3.bias",
+      "mrfs.3.convs.1.lora_conv1.lora_B",
+      "mrfs.0.convs.0.norm2.weight",
+      "mrfs.2.convs.2.norm1.num_batches_tracked",
+      "mrfs.1.convs.0.channel_attention.1.weight",
+      "mrfs.2.convs.2.norm2.running_var",
+      "mrfs.3.convs.2.norm1.weight",
+      "mrfs.2.convs.1.channel_attention.3.weight",
+      "mrfs.3.convs.0.lora_conv1.lora_B",
+      "mrfs.1.convs.0.channel_attention.3.bias",
+      "mrfs.1.convs.1.norm2.num_batches_tracked",
+      "mrfs.4.convs.2.channel_attention.1.weight",
+      "mrfs.2.convs.0.norm1.running_var",
+      "mrfs.4.convs.2.temporal_attention.0.bias",
+      "mrfs.2.convs.1.norm1.weight",
+      "mrfs.2.convs.1.norm1.running_var",
+      "mrfs.0.convs.2.channel_attention.3.weight",
+      "mrfs.4.convs.1.norm2.num_batches_tracked",
+      "mrfs.3.convs.1.norm1.running_var",
+      "mrfs.1.convs.2.lora_conv1.lora_B",
+      "mrfs.0.convs.2.norm1.running_var",
+      "mrfs.4.convs.2.norm2.bias",
+      "mrfs.2.convs.1.norm2.running_mean",
+      "mrfs.3.convs.0.norm2.running_var",
+      "mrfs.0.convs.0.lora_conv2.lora_A",
+      "mrfs.4.convs.1.norm2.running_mean",
+      "mrfs.1.convs.2.lora_conv2.lora_A",
+      "mrfs.0.convs.0.temporal_attention.0.weight",
+      "mrfs.0.convs.2.lora_conv1.lora_A",
+      "mrfs.1.convs.1.norm2.running_var",
+      "mrfs.0.convs.0.norm2.running_mean",
+      "mrfs.0.convs.2.norm1.weight",
+      "mrfs.0.convs.0.temporal_attention.0.bias",
+      "mrfs.4.convs.0.norm2.running_var",
+      "mrfs.4.convs.2.channel_attention.3.weight",
+      "mrfs.1.convs.1.norm1.weight",
+      "mrfs.2.convs.2.lora_conv1.lora_A",
+      "mrfs.2.convs.2.channel_attention.3.weight",
+      "mrfs.3.convs.2.norm1.bias",
+      "mrfs.3.convs.2.channel_attention.1.bias",
+      "mrfs.1.convs.0.norm2.weight",
+      "mrfs.2.convs.1.lora_conv2.lora_B",
+      "mrfs.1.convs.2.channel_attention.3.bias",
+      "mrfs.1.convs.2.channel_attention.1.weight",
+      "mrfs.3.convs.0.norm1.running_mean",
+      "mrfs.3.convs.0.norm1.weight",
+      "mrfs.2.convs.1.norm1.running_mean",
+      "mrfs.0.convs.2.norm2.num_batches_tracked",
+      "mrfs.4.convs.1.norm1.num_batches_tracked",
+      "mrfs.3.convs.2.lora_conv1.lora_B",
+      "mrfs.0.convs.0.lora_conv2.lora_B",
+      "mrfs.1.convs.0.norm1.weight",
+      "mrfs.3.convs.0.lora_conv2.lora_B",
+      "mrfs.3.convs.2.temporal_attention.0.bias",
+      "mrfs.1.convs.2.temporal_attention.0.bias",
+      "mrfs.3.convs.1.norm2.running_var",
+      "mrfs.1.convs.2.norm2.running_mean",
+      "mrfs.3.convs.2.channel_attention.1.weight",
+      "mrfs.2.convs.1.lora_conv1.lora_A",
+      "mrfs.0.convs.1.temporal_attention.0.weight",
+      "mrfs.3.convs.2.norm2.num_batches_tracked",
+      "mrfs.4.convs.1.norm1.running_mean",
+      "mrfs.4.convs.0.lora_conv1.lora_B"
+    ],
+    "shape_mismatches": [
+      "mrfs.1.convs.1.conv2.weight",
+      "mrfs.4.convs.1.conv1.weight",
+      "mrfs.0.convs.2.conv1.weight",
+      "mrfs.1.convs.0.conv1.weight",
+      "mrfs.2.convs.0.conv2.weight",
+      "mrfs.1.convs.2.conv2.weight",
+      "mrfs.4.convs.0.conv1.weight",
+      "mrfs.3.convs.2.conv1.weight",
+      "mrfs.2.convs.1.conv2.weight",
+      "mrfs.1.convs.1.conv1.weight",
+      "mrfs.0.convs.0.conv1.weight",
+      "mrfs.4.convs.2.conv1.weight",
+      "mrfs.3.convs.1.conv1.weight",
+      "mrfs.3.convs.2.conv2.weight",
+      "mrfs.1.convs.2.conv1.weight",
+      "mrfs.3.convs.0.conv1.weight",
+      "mrfs.0.convs.2.conv2.weight",
+      "mrfs.2.convs.2.conv1.weight",
+      "mrfs.4.convs.0.conv2.weight",
+      "mrfs.1.convs.0.conv2.weight",
+      "mrfs.2.convs.1.conv1.weight",
+      "mrfs.2.convs.2.conv2.weight",
+      "mrfs.2.convs.0.conv1.weight",
+      "mrfs.3.convs.1.conv2.weight",
+      "mrfs.0.convs.0.conv2.weight",
+      "mrfs.4.convs.1.conv2.weight",
+      "mrfs.4.convs.2.conv2.weight",
+      "mrfs.0.convs.1.conv1.weight",
+      "mrfs.3.convs.0.conv2.weight",
+      "mrfs.0.convs.1.conv2.weight"
+    ]
+  },
+  "checkpoint_shapes": {
+    "initial_conv.weight": [
+      512,
+      80,
+      7
+    ],
+    "initial_conv.bias": [
+      512
+    ],
+    "ups.0.conv.weight": [
+      512,
+      256,
+      16
+    ],
+    "ups.0.conv.bias": [
+      256
+    ],
+    "ups.0.speaker_proj.weight": [
+      256,
+      192
+    ],
+    "ups.0.speaker_proj.bias": [
+      256
+    ],
+    "ups.0.emotion_proj.weight": [
+      256,
+      256
+    ],
+    "ups.0.emotion_proj.bias": [
+      256
+    ],
+    "ups.1.conv.weight": [
+      256,
+      128,
+      16
+    ],
+    "ups.1.conv.bias": [
+      128
+    ],
+    "ups.1.speaker_proj.weight": [
+      128,
+      192
+    ],
+    "ups.1.speaker_proj.bias": [
+      128
+    ],
+    "ups.1.emotion_proj.weight": [
+      128,
+      256
+    ],
+    "ups.1.emotion_proj.bias": [
+      128
+    ],
+    "ups.2.conv.weight": [
+      128,
+      64,
+      4
+    ],
+    "ups.2.conv.bias": [
+      64
+    ],
+    "ups.2.speaker_proj.weight": [
+      64,
+      192
+    ],
+    "ups.2.speaker_proj.bias": [
+      64
+    ],
+    "ups.2.emotion_proj.weight": [
+      64,
+      256
+    ],
+    "ups.2.emotion_proj.bias": [
+      64
+    ],
+    "ups.3.conv.weight": [
+      64,
+      32,
+      4
+    ],
+    "ups.3.conv.bias": [
+      32
+    ],
+    "ups.3.speaker_proj.weight": [
+      32,
+      192
+    ],
+    "ups.3.speaker_proj.bias": [
+      32
+    ],
+    "ups.3.emotion_proj.weight": [
+      32,
+      256
+    ],
+    "ups.3.emotion_proj.bias": [
+      32
+    ],
+    "ups.4.conv.weight": [
+      32,
+      16,
+      4
+    ],
+    "ups.4.conv.bias": [
+      16
+    ],
+    "ups.4.speaker_proj.weight": [
+      16,
+      192
+    ],
+    "ups.4.speaker_proj.bias": [
+      16
+    ],
+    "ups.4.emotion_proj.weight": [
+      16,
+      256
+    ],
+    "ups.4.emotion_proj.bias": [
+      16
+    ],
+    "mrfs.0.convs.0.conv1.weight": [
+      512,
+      512,
+      3
+    ],
+    "mrfs.0.convs.0.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.conv2.weight": [
+      512,
+      512,
+      3
+    ],
+    "mrfs.0.convs.0.conv2.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.conv1.weight": [
+      512,
+      512,
+      5
+    ],
+    "mrfs.0.convs.1.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.conv2.weight": [
+      512,
+      512,
+      5
+    ],
+    "mrfs.0.convs.1.conv2.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.conv1.weight": [
+      512,
+      512,
+      7
+    ],
+    "mrfs.0.convs.2.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.conv2.weight": [
+      512,
+      512,
+      7
+    ],
+    "mrfs.0.convs.2.conv2.bias": [
+      512
+    ],
+    "mrfs.1.convs.0.conv1.weight": [
+      256,
+      256,
+      3
+    ],
+    "mrfs.1.convs.0.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.conv2.weight": [
+      256,
+      256,
+      3
+    ],
+    "mrfs.1.convs.0.conv2.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.conv1.weight": [
+      256,
+      256,
+      5
+    ],
+    "mrfs.1.convs.1.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.conv2.weight": [
+      256,
+      256,
+      5
+    ],
+    "mrfs.1.convs.1.conv2.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.conv1.weight": [
+      256,
+      256,
+      7
+    ],
+    "mrfs.1.convs.2.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.conv2.weight": [
+      256,
+      256,
+      7
+    ],
+    "mrfs.1.convs.2.conv2.bias": [
+      256
+    ],
+    "mrfs.2.convs.0.conv1.weight": [
+      128,
+      128,
+      3
+    ],
+    "mrfs.2.convs.0.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.conv2.weight": [
+      128,
+      128,
+      3
+    ],
+    "mrfs.2.convs.0.conv2.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.conv1.weight": [
+      128,
+      128,
+      5
+    ],
+    "mrfs.2.convs.1.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.conv2.weight": [
+      128,
+      128,
+      5
+    ],
+    "mrfs.2.convs.1.conv2.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.conv1.weight": [
+      128,
+      128,
+      7
+    ],
+    "mrfs.2.convs.2.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.conv2.weight": [
+      128,
+      128,
+      7
+    ],
+    "mrfs.2.convs.2.conv2.bias": [
+      128
+    ],
+    "mrfs.3.convs.0.conv1.weight": [
+      64,
+      64,
+      3
+    ],
+    "mrfs.3.convs.0.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.conv2.weight": [
+      64,
+      64,
+      3
+    ],
+    "mrfs.3.convs.0.conv2.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.conv1.weight": [
+      64,
+      64,
+      5
+    ],
+    "mrfs.3.convs.1.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.conv2.weight": [
+      64,
+      64,
+      5
+    ],
+    "mrfs.3.convs.1.conv2.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.conv1.weight": [
+      64,
+      64,
+      7
+    ],
+    "mrfs.3.convs.2.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.conv2.weight": [
+      64,
+      64,
+      7
+    ],
+    "mrfs.3.convs.2.conv2.bias": [
+      64
+    ],
+    "mrfs.4.convs.0.conv1.weight": [
+      32,
+      32,
+      3
+    ],
+    "mrfs.4.convs.0.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.conv2.weight": [
+      32,
+      32,
+      3
+    ],
+    "mrfs.4.convs.0.conv2.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.conv1.weight": [
+      32,
+      32,
+      5
+    ],
+    "mrfs.4.convs.1.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.conv2.weight": [
+      32,
+      32,
+      5
+    ],
+    "mrfs.4.convs.1.conv2.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.conv1.weight": [
+      32,
+      32,
+      7
+    ],
+    "mrfs.4.convs.2.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.conv2.weight": [
+      32,
+      32,
+      7
+    ],
+    "mrfs.4.convs.2.conv2.bias": [
+      32
+    ],
+    "final_conv.weight": [
+      1,
+      16,
+      7
+    ],
+    "final_conv.bias": [
+      1
+    ]
+  },
+  "model_shapes": {
+    "initial_conv.weight": [
+      512,
+      80,
+      7
+    ],
+    "initial_conv.bias": [
+      512
+    ],
+    "ups.0.conv.weight": [
+      512,
+      256,
+      16
+    ],
+    "ups.0.conv.bias": [
+      256
+    ],
+    "ups.0.speaker_proj.weight": [
+      256,
+      192
+    ],
+    "ups.0.speaker_proj.bias": [
+      256
+    ],
+    "ups.0.emotion_proj.weight": [
+      256,
+      256
+    ],
+    "ups.0.emotion_proj.bias": [
+      256
+    ],
+    "ups.1.conv.weight": [
+      256,
+      128,
+      16
+    ],
+    "ups.1.conv.bias": [
+      128
+    ],
+    "ups.1.speaker_proj.weight": [
+      128,
+      192
+    ],
+    "ups.1.speaker_proj.bias": [
+      128
+    ],
+    "ups.1.emotion_proj.weight": [
+      128,
+      256
+    ],
+    "ups.1.emotion_proj.bias": [
+      128
+    ],
+    "ups.2.conv.weight": [
+      128,
+      64,
+      4
+    ],
+    "ups.2.conv.bias": [
+      64
+    ],
+    "ups.2.speaker_proj.weight": [
+      64,
+      192
+    ],
+    "ups.2.speaker_proj.bias": [
+      64
+    ],
+    "ups.2.emotion_proj.weight": [
+      64,
+      256
+    ],
+    "ups.2.emotion_proj.bias": [
+      64
+    ],
+    "ups.3.conv.weight": [
+      64,
+      32,
+      4
+    ],
+    "ups.3.conv.bias": [
+      32
+    ],
+    "ups.3.speaker_proj.weight": [
+      32,
+      192
+    ],
+    "ups.3.speaker_proj.bias": [
+      32
+    ],
+    "ups.3.emotion_proj.weight": [
+      32,
+      256
+    ],
+    "ups.3.emotion_proj.bias": [
+      32
+    ],
+    "ups.4.conv.weight": [
+      32,
+      16,
+      4
+    ],
+    "ups.4.conv.bias": [
+      16
+    ],
+    "ups.4.speaker_proj.weight": [
+      16,
+      192
+    ],
+    "ups.4.speaker_proj.bias": [
+      16
+    ],
+    "ups.4.emotion_proj.weight": [
+      16,
+      256
+    ],
+    "ups.4.emotion_proj.bias": [
+      16
+    ],
+    "mrfs.0.convs.0.conv1.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.0.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.conv2.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.0.conv2.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.norm1.weight": [
+      512
+    ],
+    "mrfs.0.convs.0.norm1.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.norm1.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.0.norm1.running_var": [
+      512
+    ],
+    "mrfs.0.convs.0.norm1.num_batches_tracked": [],
+    "mrfs.0.convs.0.norm2.weight": [
+      512
+    ],
+    "mrfs.0.convs.0.norm2.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.norm2.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.0.norm2.running_var": [
+      512
+    ],
+    "mrfs.0.convs.0.norm2.num_batches_tracked": [],
+    "mrfs.0.convs.0.lora_conv1.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.0.lora_conv1.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.0.lora_conv2.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.0.lora_conv2.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.0.channel_attention.1.weight": [
+      128,
+      512,
+      1
+    ],
+    "mrfs.0.convs.0.channel_attention.1.bias": [
+      128
+    ],
+    "mrfs.0.convs.0.channel_attention.3.weight": [
+      512,
+      128,
+      1
+    ],
+    "mrfs.0.convs.0.channel_attention.3.bias": [
+      512
+    ],
+    "mrfs.0.convs.0.temporal_attention.0.weight": [
+      1,
+      512,
+      1
+    ],
+    "mrfs.0.convs.0.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.0.convs.1.conv1.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.1.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.conv2.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.1.conv2.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.norm1.weight": [
+      512
+    ],
+    "mrfs.0.convs.1.norm1.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.norm1.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.1.norm1.running_var": [
+      512
+    ],
+    "mrfs.0.convs.1.norm1.num_batches_tracked": [],
+    "mrfs.0.convs.1.norm2.weight": [
+      512
+    ],
+    "mrfs.0.convs.1.norm2.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.norm2.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.1.norm2.running_var": [
+      512
+    ],
+    "mrfs.0.convs.1.norm2.num_batches_tracked": [],
+    "mrfs.0.convs.1.lora_conv1.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.1.lora_conv1.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.1.lora_conv2.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.1.lora_conv2.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.1.channel_attention.1.weight": [
+      128,
+      512,
+      1
+    ],
+    "mrfs.0.convs.1.channel_attention.1.bias": [
+      128
+    ],
+    "mrfs.0.convs.1.channel_attention.3.weight": [
+      512,
+      128,
+      1
+    ],
+    "mrfs.0.convs.1.channel_attention.3.bias": [
+      512
+    ],
+    "mrfs.0.convs.1.temporal_attention.0.weight": [
+      1,
+      512,
+      1
+    ],
+    "mrfs.0.convs.1.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.0.convs.2.conv1.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.2.conv1.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.conv2.weight": [
+      512,
+      128,
+      3
+    ],
+    "mrfs.0.convs.2.conv2.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.norm1.weight": [
+      512
+    ],
+    "mrfs.0.convs.2.norm1.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.norm1.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.2.norm1.running_var": [
+      512
+    ],
+    "mrfs.0.convs.2.norm1.num_batches_tracked": [],
+    "mrfs.0.convs.2.norm2.weight": [
+      512
+    ],
+    "mrfs.0.convs.2.norm2.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.norm2.running_mean": [
+      512
+    ],
+    "mrfs.0.convs.2.norm2.running_var": [
+      512
+    ],
+    "mrfs.0.convs.2.norm2.num_batches_tracked": [],
+    "mrfs.0.convs.2.lora_conv1.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.2.lora_conv1.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.2.lora_conv2.lora_A": [
+      4,
+      512
+    ],
+    "mrfs.0.convs.2.lora_conv2.lora_B": [
+      512,
+      4
+    ],
+    "mrfs.0.convs.2.channel_attention.1.weight": [
+      128,
+      512,
+      1
+    ],
+    "mrfs.0.convs.2.channel_attention.1.bias": [
+      128
+    ],
+    "mrfs.0.convs.2.channel_attention.3.weight": [
+      512,
+      128,
+      1
+    ],
+    "mrfs.0.convs.2.channel_attention.3.bias": [
+      512
+    ],
+    "mrfs.0.convs.2.temporal_attention.0.weight": [
+      1,
+      512,
+      1
+    ],
+    "mrfs.0.convs.2.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.1.convs.0.conv1.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.0.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.conv2.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.0.conv2.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.norm1.weight": [
+      256
+    ],
+    "mrfs.1.convs.0.norm1.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.norm1.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.0.norm1.running_var": [
+      256
+    ],
+    "mrfs.1.convs.0.norm1.num_batches_tracked": [],
+    "mrfs.1.convs.0.norm2.weight": [
+      256
+    ],
+    "mrfs.1.convs.0.norm2.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.norm2.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.0.norm2.running_var": [
+      256
+    ],
+    "mrfs.1.convs.0.norm2.num_batches_tracked": [],
+    "mrfs.1.convs.0.lora_conv1.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.0.lora_conv1.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.0.lora_conv2.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.0.lora_conv2.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.0.channel_attention.1.weight": [
+      64,
+      256,
+      1
+    ],
+    "mrfs.1.convs.0.channel_attention.1.bias": [
+      64
+    ],
+    "mrfs.1.convs.0.channel_attention.3.weight": [
+      256,
+      64,
+      1
+    ],
+    "mrfs.1.convs.0.channel_attention.3.bias": [
+      256
+    ],
+    "mrfs.1.convs.0.temporal_attention.0.weight": [
+      1,
+      256,
+      1
+    ],
+    "mrfs.1.convs.0.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.1.convs.1.conv1.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.1.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.conv2.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.1.conv2.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.norm1.weight": [
+      256
+    ],
+    "mrfs.1.convs.1.norm1.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.norm1.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.1.norm1.running_var": [
+      256
+    ],
+    "mrfs.1.convs.1.norm1.num_batches_tracked": [],
+    "mrfs.1.convs.1.norm2.weight": [
+      256
+    ],
+    "mrfs.1.convs.1.norm2.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.norm2.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.1.norm2.running_var": [
+      256
+    ],
+    "mrfs.1.convs.1.norm2.num_batches_tracked": [],
+    "mrfs.1.convs.1.lora_conv1.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.1.lora_conv1.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.1.lora_conv2.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.1.lora_conv2.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.1.channel_attention.1.weight": [
+      64,
+      256,
+      1
+    ],
+    "mrfs.1.convs.1.channel_attention.1.bias": [
+      64
+    ],
+    "mrfs.1.convs.1.channel_attention.3.weight": [
+      256,
+      64,
+      1
+    ],
+    "mrfs.1.convs.1.channel_attention.3.bias": [
+      256
+    ],
+    "mrfs.1.convs.1.temporal_attention.0.weight": [
+      1,
+      256,
+      1
+    ],
+    "mrfs.1.convs.1.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.1.convs.2.conv1.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.2.conv1.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.conv2.weight": [
+      256,
+      64,
+      3
+    ],
+    "mrfs.1.convs.2.conv2.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.norm1.weight": [
+      256
+    ],
+    "mrfs.1.convs.2.norm1.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.norm1.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.2.norm1.running_var": [
+      256
+    ],
+    "mrfs.1.convs.2.norm1.num_batches_tracked": [],
+    "mrfs.1.convs.2.norm2.weight": [
+      256
+    ],
+    "mrfs.1.convs.2.norm2.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.norm2.running_mean": [
+      256
+    ],
+    "mrfs.1.convs.2.norm2.running_var": [
+      256
+    ],
+    "mrfs.1.convs.2.norm2.num_batches_tracked": [],
+    "mrfs.1.convs.2.lora_conv1.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.2.lora_conv1.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.2.lora_conv2.lora_A": [
+      4,
+      256
+    ],
+    "mrfs.1.convs.2.lora_conv2.lora_B": [
+      256,
+      4
+    ],
+    "mrfs.1.convs.2.channel_attention.1.weight": [
+      64,
+      256,
+      1
+    ],
+    "mrfs.1.convs.2.channel_attention.1.bias": [
+      64
+    ],
+    "mrfs.1.convs.2.channel_attention.3.weight": [
+      256,
+      64,
+      1
+    ],
+    "mrfs.1.convs.2.channel_attention.3.bias": [
+      256
+    ],
+    "mrfs.1.convs.2.temporal_attention.0.weight": [
+      1,
+      256,
+      1
+    ],
+    "mrfs.1.convs.2.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.2.convs.0.conv1.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.0.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.conv2.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.0.conv2.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.norm1.weight": [
+      128
+    ],
+    "mrfs.2.convs.0.norm1.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.norm1.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.0.norm1.running_var": [
+      128
+    ],
+    "mrfs.2.convs.0.norm1.num_batches_tracked": [],
+    "mrfs.2.convs.0.norm2.weight": [
+      128
+    ],
+    "mrfs.2.convs.0.norm2.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.norm2.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.0.norm2.running_var": [
+      128
+    ],
+    "mrfs.2.convs.0.norm2.num_batches_tracked": [],
+    "mrfs.2.convs.0.lora_conv1.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.0.lora_conv1.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.0.lora_conv2.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.0.lora_conv2.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.0.channel_attention.1.weight": [
+      32,
+      128,
+      1
+    ],
+    "mrfs.2.convs.0.channel_attention.1.bias": [
+      32
+    ],
+    "mrfs.2.convs.0.channel_attention.3.weight": [
+      128,
+      32,
+      1
+    ],
+    "mrfs.2.convs.0.channel_attention.3.bias": [
+      128
+    ],
+    "mrfs.2.convs.0.temporal_attention.0.weight": [
+      1,
+      128,
+      1
+    ],
+    "mrfs.2.convs.0.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.2.convs.1.conv1.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.1.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.conv2.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.1.conv2.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.norm1.weight": [
+      128
+    ],
+    "mrfs.2.convs.1.norm1.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.norm1.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.1.norm1.running_var": [
+      128
+    ],
+    "mrfs.2.convs.1.norm1.num_batches_tracked": [],
+    "mrfs.2.convs.1.norm2.weight": [
+      128
+    ],
+    "mrfs.2.convs.1.norm2.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.norm2.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.1.norm2.running_var": [
+      128
+    ],
+    "mrfs.2.convs.1.norm2.num_batches_tracked": [],
+    "mrfs.2.convs.1.lora_conv1.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.1.lora_conv1.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.1.lora_conv2.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.1.lora_conv2.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.1.channel_attention.1.weight": [
+      32,
+      128,
+      1
+    ],
+    "mrfs.2.convs.1.channel_attention.1.bias": [
+      32
+    ],
+    "mrfs.2.convs.1.channel_attention.3.weight": [
+      128,
+      32,
+      1
+    ],
+    "mrfs.2.convs.1.channel_attention.3.bias": [
+      128
+    ],
+    "mrfs.2.convs.1.temporal_attention.0.weight": [
+      1,
+      128,
+      1
+    ],
+    "mrfs.2.convs.1.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.2.convs.2.conv1.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.2.conv1.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.conv2.weight": [
+      128,
+      32,
+      3
+    ],
+    "mrfs.2.convs.2.conv2.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.norm1.weight": [
+      128
+    ],
+    "mrfs.2.convs.2.norm1.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.norm1.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.2.norm1.running_var": [
+      128
+    ],
+    "mrfs.2.convs.2.norm1.num_batches_tracked": [],
+    "mrfs.2.convs.2.norm2.weight": [
+      128
+    ],
+    "mrfs.2.convs.2.norm2.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.norm2.running_mean": [
+      128
+    ],
+    "mrfs.2.convs.2.norm2.running_var": [
+      128
+    ],
+    "mrfs.2.convs.2.norm2.num_batches_tracked": [],
+    "mrfs.2.convs.2.lora_conv1.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.2.lora_conv1.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.2.lora_conv2.lora_A": [
+      4,
+      128
+    ],
+    "mrfs.2.convs.2.lora_conv2.lora_B": [
+      128,
+      4
+    ],
+    "mrfs.2.convs.2.channel_attention.1.weight": [
+      32,
+      128,
+      1
+    ],
+    "mrfs.2.convs.2.channel_attention.1.bias": [
+      32
+    ],
+    "mrfs.2.convs.2.channel_attention.3.weight": [
+      128,
+      32,
+      1
+    ],
+    "mrfs.2.convs.2.channel_attention.3.bias": [
+      128
+    ],
+    "mrfs.2.convs.2.temporal_attention.0.weight": [
+      1,
+      128,
+      1
+    ],
+    "mrfs.2.convs.2.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.3.convs.0.conv1.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.0.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.conv2.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.0.conv2.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.norm1.weight": [
+      64
+    ],
+    "mrfs.3.convs.0.norm1.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.norm1.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.0.norm1.running_var": [
+      64
+    ],
+    "mrfs.3.convs.0.norm1.num_batches_tracked": [],
+    "mrfs.3.convs.0.norm2.weight": [
+      64
+    ],
+    "mrfs.3.convs.0.norm2.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.norm2.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.0.norm2.running_var": [
+      64
+    ],
+    "mrfs.3.convs.0.norm2.num_batches_tracked": [],
+    "mrfs.3.convs.0.lora_conv1.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.0.lora_conv1.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.0.lora_conv2.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.0.lora_conv2.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.0.channel_attention.1.weight": [
+      16,
+      64,
+      1
+    ],
+    "mrfs.3.convs.0.channel_attention.1.bias": [
+      16
+    ],
+    "mrfs.3.convs.0.channel_attention.3.weight": [
+      64,
+      16,
+      1
+    ],
+    "mrfs.3.convs.0.channel_attention.3.bias": [
+      64
+    ],
+    "mrfs.3.convs.0.temporal_attention.0.weight": [
+      1,
+      64,
+      1
+    ],
+    "mrfs.3.convs.0.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.3.convs.1.conv1.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.1.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.conv2.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.1.conv2.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.norm1.weight": [
+      64
+    ],
+    "mrfs.3.convs.1.norm1.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.norm1.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.1.norm1.running_var": [
+      64
+    ],
+    "mrfs.3.convs.1.norm1.num_batches_tracked": [],
+    "mrfs.3.convs.1.norm2.weight": [
+      64
+    ],
+    "mrfs.3.convs.1.norm2.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.norm2.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.1.norm2.running_var": [
+      64
+    ],
+    "mrfs.3.convs.1.norm2.num_batches_tracked": [],
+    "mrfs.3.convs.1.lora_conv1.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.1.lora_conv1.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.1.lora_conv2.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.1.lora_conv2.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.1.channel_attention.1.weight": [
+      16,
+      64,
+      1
+    ],
+    "mrfs.3.convs.1.channel_attention.1.bias": [
+      16
+    ],
+    "mrfs.3.convs.1.channel_attention.3.weight": [
+      64,
+      16,
+      1
+    ],
+    "mrfs.3.convs.1.channel_attention.3.bias": [
+      64
+    ],
+    "mrfs.3.convs.1.temporal_attention.0.weight": [
+      1,
+      64,
+      1
+    ],
+    "mrfs.3.convs.1.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.3.convs.2.conv1.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.2.conv1.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.conv2.weight": [
+      64,
+      16,
+      3
+    ],
+    "mrfs.3.convs.2.conv2.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.norm1.weight": [
+      64
+    ],
+    "mrfs.3.convs.2.norm1.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.norm1.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.2.norm1.running_var": [
+      64
+    ],
+    "mrfs.3.convs.2.norm1.num_batches_tracked": [],
+    "mrfs.3.convs.2.norm2.weight": [
+      64
+    ],
+    "mrfs.3.convs.2.norm2.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.norm2.running_mean": [
+      64
+    ],
+    "mrfs.3.convs.2.norm2.running_var": [
+      64
+    ],
+    "mrfs.3.convs.2.norm2.num_batches_tracked": [],
+    "mrfs.3.convs.2.lora_conv1.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.2.lora_conv1.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.2.lora_conv2.lora_A": [
+      4,
+      64
+    ],
+    "mrfs.3.convs.2.lora_conv2.lora_B": [
+      64,
+      4
+    ],
+    "mrfs.3.convs.2.channel_attention.1.weight": [
+      16,
+      64,
+      1
+    ],
+    "mrfs.3.convs.2.channel_attention.1.bias": [
+      16
+    ],
+    "mrfs.3.convs.2.channel_attention.3.weight": [
+      64,
+      16,
+      1
+    ],
+    "mrfs.3.convs.2.channel_attention.3.bias": [
+      64
+    ],
+    "mrfs.3.convs.2.temporal_attention.0.weight": [
+      1,
+      64,
+      1
+    ],
+    "mrfs.3.convs.2.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.4.convs.0.conv1.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.0.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.conv2.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.0.conv2.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.norm1.weight": [
+      32
+    ],
+    "mrfs.4.convs.0.norm1.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.norm1.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.0.norm1.running_var": [
+      32
+    ],
+    "mrfs.4.convs.0.norm1.num_batches_tracked": [],
+    "mrfs.4.convs.0.norm2.weight": [
+      32
+    ],
+    "mrfs.4.convs.0.norm2.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.norm2.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.0.norm2.running_var": [
+      32
+    ],
+    "mrfs.4.convs.0.norm2.num_batches_tracked": [],
+    "mrfs.4.convs.0.lora_conv1.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.0.lora_conv1.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.0.lora_conv2.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.0.lora_conv2.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.0.channel_attention.1.weight": [
+      8,
+      32,
+      1
+    ],
+    "mrfs.4.convs.0.channel_attention.1.bias": [
+      8
+    ],
+    "mrfs.4.convs.0.channel_attention.3.weight": [
+      32,
+      8,
+      1
+    ],
+    "mrfs.4.convs.0.channel_attention.3.bias": [
+      32
+    ],
+    "mrfs.4.convs.0.temporal_attention.0.weight": [
+      1,
+      32,
+      1
+    ],
+    "mrfs.4.convs.0.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.4.convs.1.conv1.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.1.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.conv2.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.1.conv2.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.norm1.weight": [
+      32
+    ],
+    "mrfs.4.convs.1.norm1.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.norm1.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.1.norm1.running_var": [
+      32
+    ],
+    "mrfs.4.convs.1.norm1.num_batches_tracked": [],
+    "mrfs.4.convs.1.norm2.weight": [
+      32
+    ],
+    "mrfs.4.convs.1.norm2.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.norm2.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.1.norm2.running_var": [
+      32
+    ],
+    "mrfs.4.convs.1.norm2.num_batches_tracked": [],
+    "mrfs.4.convs.1.lora_conv1.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.1.lora_conv1.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.1.lora_conv2.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.1.lora_conv2.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.1.channel_attention.1.weight": [
+      8,
+      32,
+      1
+    ],
+    "mrfs.4.convs.1.channel_attention.1.bias": [
+      8
+    ],
+    "mrfs.4.convs.1.channel_attention.3.weight": [
+      32,
+      8,
+      1
+    ],
+    "mrfs.4.convs.1.channel_attention.3.bias": [
+      32
+    ],
+    "mrfs.4.convs.1.temporal_attention.0.weight": [
+      1,
+      32,
+      1
+    ],
+    "mrfs.4.convs.1.temporal_attention.0.bias": [
+      1
+    ],
+    "mrfs.4.convs.2.conv1.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.2.conv1.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.conv2.weight": [
+      32,
+      8,
+      3
+    ],
+    "mrfs.4.convs.2.conv2.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.norm1.weight": [
+      32
+    ],
+    "mrfs.4.convs.2.norm1.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.norm1.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.2.norm1.running_var": [
+      32
+    ],
+    "mrfs.4.convs.2.norm1.num_batches_tracked": [],
+    "mrfs.4.convs.2.norm2.weight": [
+      32
+    ],
+    "mrfs.4.convs.2.norm2.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.norm2.running_mean": [
+      32
+    ],
+    "mrfs.4.convs.2.norm2.running_var": [
+      32
+    ],
+    "mrfs.4.convs.2.norm2.num_batches_tracked": [],
+    "mrfs.4.convs.2.lora_conv1.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.2.lora_conv1.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.2.lora_conv2.lora_A": [
+      4,
+      32
+    ],
+    "mrfs.4.convs.2.lora_conv2.lora_B": [
+      32,
+      4
+    ],
+    "mrfs.4.convs.2.channel_attention.1.weight": [
+      8,
+      32,
+      1
+    ],
+    "mrfs.4.convs.2.channel_attention.1.bias": [
+      8
+    ],
+    "mrfs.4.convs.2.channel_attention.3.weight": [
+      32,
+      8,
+      1
+    ],
+    "mrfs.4.convs.2.channel_attention.3.bias": [
+      32
+    ],
+    "mrfs.4.convs.2.temporal_attention.0.weight": [
+      1,
+      32,
+      1
+    ],
+    "mrfs.4.convs.2.temporal_attention.0.bias": [
+      1
+    ],
+    "final_conv.weight": [
+      1,
+      16,
+      7
+    ],
+    "final_conv.bias": [
+      1
+    ]
+  },
+  "grc_structure": {
+    "mrfs.0": {
+      "total_params": 72,
+      "has_nested_convs": true,
+      "has_conv1_conv2": true,
+      "num_grc_blocks": 3
+    },
+    "mrfs.1": {
+      "total_params": 72,
+      "has_nested_convs": true,
+      "has_conv1_conv2": true,
+      "num_grc_blocks": 3
+    },
+    "mrfs.2": {
+      "total_params": 72,
+      "has_nested_convs": true,
+      "has_conv1_conv2": true,
+      "num_grc_blocks": 3
+    },
+    "mrfs.3": {
+      "total_params": 72,
+      "has_nested_convs": true,
+      "has_conv1_conv2": true,
+      "num_grc_blocks": 3
+    },
+    "mrfs.4": {
+      "total_params": 72,
+      "has_nested_convs": true,
+      "has_conv1_conv2": true,
+      "num_grc_blocks": 3
+    }
+  }
+}

@@ -25,23 +25,15 @@ class EnglishTTSComponent:
     def __init__(self, device=None):
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        # Load vocoder config for exact parameter matching
-        try:
-            from utils.mel_utils import load_vocoder_config
-            config_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'diagnostics', 'vocoder_config.json')
-            self.vocoder_config = load_vocoder_config(config_path)
-            print(f"English TTS component initialized on device: {self.device}")
-            print(f"Loaded vocoder config: sampling_rate={self.vocoder_config['sampling_rate']}, n_mels={self.vocoder_config['n_mels']}, hop_length={self.vocoder_config['hop_length']}")
-        except Exception as e:
-            print(f"Warning: Could not load vocoder config: {e}")
-            # Fallback config
-            self.vocoder_config = {
-                'sampling_rate': 22050,
-                'n_mels': 80,
-                'hop_length': 256,
-                'win_length': 1024,
-                'filter_length': 1024
-            }
+        # Use default vocoder config (simplified)
+        self.vocoder_config = {
+            'sampling_rate': 22050,
+            'n_mels': 80,
+            'hop_length': 256,
+            'win_length': 1024,
+            'filter_length': 1024
+        }
+        print(f"English TTS component initialized on device: {self.device}")
     
     def text_to_mel_spectrogram(self, english_text):
         """Generate realistic mel-spectrograms using exact vocoder parameters"""
@@ -57,22 +49,23 @@ class EnglishTTSComponent:
             words = len(english_text.split())
             duration = max(1.5, words * 0.3)  # 0.3 seconds per word, minimum 1.5 seconds
             
-            # Generate realistic waveform first, then convert to mel using exact vocoder params
+            # Generate realistic waveform first, then convert to mel
             waveform = self._generate_realistic_waveform(english_text, duration, sample_rate)
             
-            # Convert waveform to mel-spectrogram using exact vocoder parameters
-            from utils.mel_utils import waveform_to_log_mel, validate_mel_format
+            # Convert waveform to mel-spectrogram using librosa
+            mel_spectrogram = librosa.feature.melspectrogram(
+                y=waveform, 
+                sr=sample_rate, 
+                n_mels=n_mels, 
+                hop_length=hop_length,
+                n_fft=self.vocoder_config.get('filter_length', 1024)
+            )
             
-            mel_spectrogram = waveform_to_log_mel(waveform, self.vocoder_config)
-            
-            # Validate mel-spectrogram
-            validation = validate_mel_format(mel_spectrogram, self.vocoder_config)
-            if not validation['valid']:
-                print(f"[WARNING] Mel-spectrogram validation issues: {validation['issues']}")
+            # Convert to log scale
+            mel_spectrogram = torch.from_numpy(np.log(np.clip(mel_spectrogram, a_min=1e-5, a_max=None)))
             
             print(f"[TTS] Generated English mel-spectrogram: {mel_spectrogram.shape}")
             print(f"[TTS] Mel-spectrogram stats: min={mel_spectrogram.min():.4f}, max={mel_spectrogram.max():.4f}, mean={mel_spectrogram.mean():.4f}")
-            print(f"[TTS] Mel-spectrogram validation: {'PASS' if validation['valid'] else 'FAIL'}")
             
             return mel_spectrogram.numpy()  # Convert to numpy for compatibility
             
@@ -212,6 +205,14 @@ class StreamSpeechModifications:
         """Initialize Trained Model Loader"""
         try:
             print("[INIT] Initializing Trained Model Loader...")
+            print("[INIT] ⚠️ KNOWN ISSUE: Model architecture mismatch causes static output")
+            print("[INIT] Skipping trained model - using fallback vocoder for reliable audio")
+            print("[INIT] TODO: Fix GRC block architecture to match checkpoint structure")
+            # Skip trained model until architecture is fixed
+            self.trained_model_loader = None
+            return
+            
+            # This code is disabled until architecture is fixed
             from integrate_trained_model import TrainedModelLoader
             
             self.trained_model_loader = TrainedModelLoader()

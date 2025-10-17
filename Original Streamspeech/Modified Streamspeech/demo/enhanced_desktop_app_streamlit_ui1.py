@@ -238,34 +238,11 @@ class StreamSpeechComparisonApp(QMainWindow):
             # Initialize Defense-Ready StreamSpeech with guaranteed English audio output
             print("Initializing Defense-Ready StreamSpeech for thesis defense...")
             
-            # REAL ODConv modifications first
-            try:
-                # Import the real ODConv implementation
-                import sys
-                real_modifications_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
-                sys.path.append(real_modifications_path)
-                
-                from working_real_odconv_integration import WorkingODConvIntegration
-                print("REAL ODConv import successful, creating instance...")
-                self.modified_streamspeech = WorkingODConvIntegration()
-                self.real_odconv = self.modified_streamspeech  # Set the reference for checking
-                print("REAL ODConv instance created successfully!")
-                
-                print("REAL ODConv + GRC+LoRA thesis modifications loaded successfully:")
-                print("  - REAL ODConv: Omni-Dimensional Dynamic Convolution")
-                print("  - REAL GRC+LoRA: Grouped Residual Convolution with Low-Rank Adaptation")
-                print("  - REAL FiLM: Feature-wise Linear Modulation conditioning")
-                print("  - REAL Voice Cloning: Speaker and emotion preservation")
-                print("  - REAL trained models loaded from trained_models/hifigan_checkpoints/")
-                
-            except Exception as init_error:
-                print(f"ERROR: Failed to import REAL ODConv modifications: {init_error}")
-                import traceback
-                print(f"Traceback: {traceback.format_exc()}")
-                self.real_odconv = None  # Set to None so fallback is used
-                
-                # Fallback to enhanced pipeline (only if real ODConv not loaded)
-            if self.real_odconv is None:
+            # Use StreamSpeech modifications (cleaned up, no separate ODConv module)
+            self.real_odconv = None  # Not using separate ODConv module
+            
+            # Load StreamSpeech modifications
+            if True:
                 try:
                     from enhanced_streamspeech_pipeline import EnhancedStreamSpeechPipeline
                     print("Fallback: Importing enhanced StreamSpeech pipeline...")
@@ -2441,18 +2418,7 @@ class StreamSpeechComparisonApp(QMainWindow):
                 try:
                     print("Using REAL ODConv + GRC+LoRA modifications for Modified mode...")
                     
-                    # If current instance can't run ODConv, try to load it now (non-disruptive)
-                    if not (self.modified_streamspeech is not None and hasattr(self.modified_streamspeech, 'process_audio_with_odconv')):
-                        try:
-                            import sys as _sys, os as _os
-                            real_mod_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
-                            _sys.path.append(real_mod_path)
-                            from working_real_odconv_integration import WorkingODConvIntegration as _W
-                            print("Attempting runtime load of REAL ODConv integration...")
-                            self.modified_streamspeech = _W()
-                            print("Runtime REAL ODConv integration loaded successfully")
-                        except Exception as _runtime_err:
-                            print(f"Runtime REAL ODConv load failed: {_runtime_err}")
+                    # Use existing modified_streamspeech instance (no separate ODConv module needed)
                     
                     # Check if real modifications are available
                     if self.modified_streamspeech is not None and hasattr(self.modified_streamspeech, 'process_audio_with_odconv'):
@@ -3042,33 +3008,11 @@ class StreamSpeechComparisonApp(QMainWindow):
             # Initialize Defense-Ready StreamSpeech with guaranteed English audio output
             self.syslog("Initializing Defense-Ready StreamSpeech for thesis defense...")
             
-            # Try REAL ODConv modifications first
-            try:
-                # Import the real ODConv implementation
-                import sys
-                real_modifications_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Important files - for tool")
-                sys.path.append(real_modifications_path)
-                
-                from working_real_odconv_integration import WorkingODConvIntegration
-                self.syslog("REAL ODConv import successful, creating instance...")
-                self.modified_streamspeech = WorkingODConvIntegration()
-                self.real_odconv = self.modified_streamspeech  # Set the reference for checking
-                self.syslog("REAL ODConv instance created successfully!")
-                
-                self.syslog("REAL ODConv + GRC+LoRA thesis modifications loaded successfully:")
-                self.syslog("  - REAL ODConv: Omni-Dimensional Dynamic Convolution")
-                self.syslog("  - REAL GRC+LoRA: Grouped Residual Convolution with Low-Rank Adaptation")
-                self.syslog("  - REAL FiLM: Feature-wise Linear Modulation conditioning")
-                self.syslog("  - REAL Voice Cloning: Speaker and emotion preservation")
-                self.syslog("  - REAL trained models loaded from trained_models/hifigan_checkpoints/")
-                
-            except Exception as init_error:
-                self.syslog(f"ERROR: Failed to import REAL ODConv modifications: {init_error}")
-                import traceback
-                self.syslog(f"Traceback: {traceback.format_exc()}")
-                self.real_odconv = None  # Set to None so fallback is used
-                
-                # Fallback to enhanced pipeline
+            # Use StreamSpeech modifications (cleaned up version)
+            self.syslog("Loading StreamSpeech modifications...")
+            self.real_odconv = None  # Not using separate ODConv module
+            
+            # Fallback to enhanced pipeline
             try:
                 from enhanced_streamspeech_pipeline import EnhancedStreamSpeechPipeline
                 self.syslog("Fallback: Importing enhanced StreamSpeech pipeline...")

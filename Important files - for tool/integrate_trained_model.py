@@ -68,9 +68,26 @@ class TrainedModelLoader:
                 ODConvTranspose1D = nn.ConvTranspose1d
             
             try:
-                from grc_lora_fixed import MultiReceptiveFieldFusion
-            except ImportError:
-                print("Warning: grc_lora_fixed module not found, using standard Conv1d")
+                from grc_lora import GroupedResidualConvolution
+                
+                # Create MRF using GRC blocks
+                class MultiReceptiveFieldFusion(nn.Module):
+                    def __init__(self, channels):
+                        super().__init__()
+                        # MRF with multiple GRC blocks at different dilations
+                        self.convs = nn.ModuleList([
+                            GroupedResidualConvolution(channels, kernel_size=3, dilation=1),
+                            GroupedResidualConvolution(channels, kernel_size=3, dilation=3),
+                            GroupedResidualConvolution(channels, kernel_size=3, dilation=5)
+                        ])
+                    
+                    def forward(self, x):
+                        # Apply all GRC blocks and sum
+                        out = sum(conv(x) for conv in self.convs)
+                        return out
+                        
+            except ImportError as e:
+                print(f"Warning: grc_lora module not found ({e}), using standard Conv1d")
                 class MultiReceptiveFieldFusion(nn.Module):
                     def __init__(self, channels):
                         super().__init__()

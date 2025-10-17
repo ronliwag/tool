@@ -1,0 +1,25 @@
+{
+  "sample_rates": {
+    "input": 22050,
+    "mel_conversion": 22050,
+    "pipeline_output": 22050,
+    "original_output": 16000,
+    "modified_output": 22050
+  },
+  "audio_durations": {
+    "input": 3.864036281179138,
+    "pipeline_output": 3.0,
+    "original_output": 3.66,
+    "modified_output": 3.0
+  },
+  "translations": {
+    "spanish": "No hay bien ni mal que 100 a\u00f1os dure.",
+    "english": "There is no good or bad that 100 years lasts.",
+    "original_spanish": "la segunda",
+    "original_english": "the second",
+    "modified_spanish": "No hay bien ni mal que 100 a\u00f1os dure.",
+    "modified_english": "There is no good or bad that 100 years lasts."
+  },
+  "errors": [],
+  "mel_spectrograms": {}
+}
